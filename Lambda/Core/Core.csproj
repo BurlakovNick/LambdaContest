@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\Claim.cs" />
+    <Compile Include="Contracts\Converters\Converter.cs" />
     <Compile Include="Contracts\HandshakeCommand.cs" />
     <Compile Include="Contracts\HandshakeMessage.cs" />
     <Compile Include="Contracts\MapContract.cs" />
