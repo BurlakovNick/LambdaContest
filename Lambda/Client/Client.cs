@@ -1,6 +1,8 @@
 ﻿using System;
+using Core;
 using Core.Contracts;
 using Core.Contracts.Converters;
+using Core.Objects;
 using Newtonsoft.Json;
 using SimpleTCP;
 
@@ -34,8 +36,6 @@ namespace Client
 				case GameStatus.Gameplay:
 					HandleGameplay(e);
 					break;
-				case GameStatus.Scoring:
-					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
@@ -58,6 +58,14 @@ namespace Client
 
 		private void HandleGameplay(Message e)
 		{
+			var moveMessage = JsonConvert.DeserializeObject<MoveMessage>(e.MessageString);
+			if (moveMessage.IsStop)
+			{
+				//show scores
+			}
+			else
+			{
+			}
 		}
 	}
 }

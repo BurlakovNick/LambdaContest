@@ -3,7 +3,6 @@
 	public enum GameStatus
 	{
 		Setup,
-		Gameplay,
-		Scoring
+		Gameplay
 	}
 }
