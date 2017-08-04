@@ -55,6 +55,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\Claim.cs" />
+    <Compile Include="Contracts\HandshakeCommand.cs" />
+    <Compile Include="Contracts\HandshakeMessage.cs" />
+    <Compile Include="Contracts\MapContract.cs" />
+    <Compile Include="Contracts\MoveCommand.cs" />
+    <Compile Include="Contracts\MoveMessage.cs" />
+    <Compile Include="Contracts\Pass.cs" />
+    <Compile Include="Contracts\RiverContract.cs" />
+    <Compile Include="Contracts\ScoringMessage.cs" />
+    <Compile Include="Contracts\SetupCommand.cs" />
+    <Compile Include="Contracts\SetupMessage.cs" />
+    <Compile Include="Contracts\SiteContract.cs" />
     <Compile Include="DistanceCalculator.cs" />
     <Compile Include="GraphVisitor.cs" />
     <Compile Include="IDistanceCalculator.cs" />
