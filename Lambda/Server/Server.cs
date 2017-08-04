@@ -1,8 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Core;
 using Core.Contracts;
 using Core.Contracts.Converters;
@@ -83,21 +81,21 @@ namespace Server
 		{
 			var moveNumber = 0;
 			var lastMoves = new MoveMessage
-						{
-							move = new MoveMessage.Internal
-								   {
-									   moves = session.Clients
-													  .Select((x,
-															   i) => new MoveCommand
-																	 {
-																		 pass = new Pass
-																				{
-																					punter = i
-																				}
-																	 })
-													  .ToList()
-								   }
-						};
+							{
+								move = new MoveMessage.InternalMove
+									   {
+										   moves = session.Clients
+														  .Select((x,
+																   i) => new MoveCommand
+																		 {
+																			 pass = new Pass
+																					{
+																						punter = i
+																					}
+																		 })
+														  .ToList()
+									   }
+							};
 			var moves = lastMoves;
 
 			while (moveNumber != map.rivers.Length)
@@ -130,20 +128,19 @@ namespace Server
 											   {
 												   Map = mapInfo,
 												   CurrentPunter = new Punter { Id = i }
-
 											   })
 								.Select(x => (x.CurrentPunter, scorer.Score(x)))
 								.ToArray();
 
 			foreach (var connection in session.Clients)
 			{
-				var scoringMessage = new ScoringMessage
+				var scoringMessage = new MoveMessage
 									 {
-										 stop = new ScoringMessage.Internal
+										 stop = new MoveMessage.InternalStop
 												{
 													moves = lastMoves.move.moves,
 													scores = scores
-														.Select(x => new ScoringMessage.Score
+														.Select(x => new MoveMessage.Score
 																	 {
 																		 punter = x.Item1.Id,
 																		 score = x.Item2
@@ -161,28 +158,6 @@ namespace Server
 			var fileContent = File.ReadAllText(filePath);
 			var map = JsonConvert.DeserializeObject<MapContract>(fileContent);
 			return map;
-		}
-	}
-
-	public static class Ext
-	{
-		public static Message WriteAndGetReply(this SimpleTcpClient client,
-											   string data,
-											   TimeSpan timeout)
-		{
-			Message mReply = null;
-
-			void onReceived(object s,
-							Message e) => mReply = e;
-
-			client.DataReceived += onReceived;
-			client.Write(data);
-			Stopwatch stopwatch = new Stopwatch();
-			stopwatch.Start();
-			while (mReply == null && stopwatch.Elapsed < timeout)
-				Thread.Sleep(10);
-			client.DataReceived -= onReceived;
-			return mReply;
 		}
 	}
 }

@@ -64,7 +64,6 @@
     <Compile Include="Contracts\MoveMessage.cs" />
     <Compile Include="Contracts\Pass.cs" />
     <Compile Include="Contracts\RiverContract.cs" />
-    <Compile Include="Contracts\ScoringMessage.cs" />
     <Compile Include="Contracts\SetupCommand.cs" />
     <Compile Include="Contracts\SetupMessage.cs" />
     <Compile Include="Contracts\SiteContract.cs" />

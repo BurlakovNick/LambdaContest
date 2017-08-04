@@ -1,4 +1,5 @@
 ﻿using System;
+using Core;
 
 namespace Server
 {
@@ -6,7 +7,7 @@ namespace Server
 	{
 		static void Main(string[] args)
 		{
-			IServer server = null;
+			IServer server = new Server(new Scorer(new DistanceCalculator(), new GraphVisitor()));
 
 			server.Start(playersCount: 2);
 
