@@ -4,6 +4,7 @@ namespace Core
 {
     public interface IScorer
     {
-        int Score(GameState gameState, Punter punter);
+        void Init(Map map);
+        int Score(GameState gameState);
     }
 }
