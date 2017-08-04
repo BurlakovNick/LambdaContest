@@ -57,6 +57,8 @@
   <ItemGroup>
     <Compile Include="DistanceCalculator.cs" />
     <Compile Include="GraphVisitor.cs" />
+    <Compile Include="GreedyComponent\Component.cs" />
+    <Compile Include="GreedyComponent\GreedyComponentPunter.cs" />
     <Compile Include="IDistanceCalculator.cs" />
     <Compile Include="IGraphVisitor.cs" />
     <Compile Include="IPunter.cs" />

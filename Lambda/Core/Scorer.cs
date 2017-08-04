@@ -55,7 +55,7 @@ namespace Core
             return score;
         }
 
-        private int GetDistance(Node from, Node to)
+        public int GetDistance(Node from, Node to)
         {
             if (distancesFromMines.TryGetValue((from.Id, to.Id), out var dist))
             {

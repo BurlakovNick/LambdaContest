@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Core.Objects
 {
@@ -32,5 +33,9 @@ namespace Core.Objects
         public Edge[] Edges { get; }
 
         public List<(Node, Edge)> GetEdges(int fromNodeId) => nodeEdges[fromNodeId];
+
+        public List<(Node, Edge)> GetAvaliableEdges(int fromNodeId, Punter punter) => nodeEdges[fromNodeId]
+            .Where(e => e.Item2.Punter == null || e.Item2.Punter == punter)
+            .ToList();
     }
 }
