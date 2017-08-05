@@ -1,19 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Objects;
 
 namespace Core
 {
-    public class GreedyEdgeChooserPunter : IPunter
+    public class GreedyEdgeChooserPunterWithStupidZergRush : IPunter
     {
         private readonly IScorer scorer;
         private readonly IGraphVisitor graphVisitor;
 
-        public GreedyEdgeChooserPunter(
+        public GreedyEdgeChooserPunterWithStupidZergRush(
             IScorer scorer,
             IGraphVisitor graphVisitor
-            )
+        )
         {
             this.scorer = scorer;
             this.graphVisitor = graphVisitor;
@@ -35,9 +35,22 @@ namespace Core
             var punters = connectedComponents.GetPunters;
             var scoreByPunter = punters
                 .ToDictionary(x => x,
-                    x => scorer.Score(new GameState {Map = map, CurrentPunter = new Punter {Id = x}}));
+                    x => scorer.Score(new GameState { Map = map, CurrentPunter = new Punter { Id = x } }));
 
             var reachableNodeIds = GetReachableNodesFromMines(map, punter);
+
+            var bestRushingPathEdge = map
+                .Edges
+                .Where(x => x.Source.IsMine || x.Target.IsMine)
+                .Where(x => x.Punter == null)
+                .OrderByDescending(x => GetWeight(gameState, x, punter, connectedComponents))
+                .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
+                .FirstOrDefault();
+
+            if (bestRushingPathEdge != null)
+            {
+                return bestRushingPathEdge;
+            }
 
             var bestIncreasingPathEdge = map
                 .Edges

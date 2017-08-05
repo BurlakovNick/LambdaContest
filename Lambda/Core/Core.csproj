@@ -74,6 +74,8 @@
     <Compile Include="GreedyComponent\GreedyComponentPunter.cs" />
     <Compile Include="GreedyEdgeChooserPunter.cs" />
     <Compile Include="GreedyDesired\GreedyDesiredPunter.cs" />
+    <Compile Include="GreedyEdgeChooserPunterWithStupidZergRush.cs" />
+    <Compile Include="GreedyEdgeChooserPunterWithZergRush.cs" />
     <Compile Include="IDistanceCalculator.cs" />
     <Compile Include="IGraphVisitor.cs" />
     <Compile Include="Infrastructure\Serializer.cs" />
@@ -81,6 +83,7 @@
     <Compile Include="Infrastructure\ConsoleLog.cs" />
     <Compile Include="IPunter.cs" />
     <Compile Include="IScorer.cs" />
+    <Compile Include="Objects\PunterConnectedComponents.cs" />
     <Compile Include="Objects\Edge.cs" />
     <Compile Include="Objects\Game.cs" />
     <Compile Include="Objects\GameState.cs" />

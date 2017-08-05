@@ -34,10 +34,12 @@ namespace Server
 
         public void Start(int playersCount)
         {
-            if (File.Exists("scores.txt"))
-                File.Delete("scores.txt");
-            if (File.Exists("who.txt"))
-                File.Delete("who.txt");
+            ClearFile("moves.txt");
+            ClearFile("map_command.txt");
+            ClearFile("move_commands.txt");
+            ClearFile("players_count.txt");
+            ClearFile("scores.txt");
+            ClearFile("who.txt");
             session = new GameSession(playersCount);
             tcpServer = new SimpleTcpServer().Start(7777);
             log("Tcp Server listening...");
@@ -87,6 +89,7 @@ namespace Server
         private void Setup()
         {
             var map = GetMap(mapName);
+            LogMapToFile(map, session.PlayersCount);
             scorer.Init(Converter.Convert(map));
             foreach (var x in session.Clients)
             {
@@ -114,10 +117,7 @@ namespace Server
         private void Game(MapContract map)
         {
             log("Letsplay =)");
-            if (File.Exists("moves.txt"))
-            {
-                File.Delete("moves.txt");
-            }
+
             var moveNumber = 1;
             var lastMoves = new MoveMessage
                             {
@@ -167,6 +167,14 @@ namespace Server
             Scoring(map, lastMoves.move.moves, moves);
         }
 
+        private static void ClearFile(string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+            }
+        }
+
         private void Scoring(MapContract map,
                              List<MoveCommand> lastMoves,
                              List<MoveCommand> moves)
@@ -208,10 +216,18 @@ namespace Server
             return map;
         }
 
+        private void LogMapToFile(MapContract map, int playersCount)
+        {
+            File.AppendAllLines("map_command.txt", new[] {JsonConvert.SerializeObject(map)});
+            File.AppendAllLines("players_count.txt", new[] { JsonConvert.SerializeObject(playersCount) });
+        }
+
         private static void LogClaimToFile(int i,
                                            MoveCommand x)
         {
             File.AppendAllLines("moves.txt", new[] { $"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}" });
+
+            File.AppendAllLines("move_commands.txt", new[] {JsonConvert.SerializeObject(x)});
         }
 
         private (Punter, int)[] LogScores(MapContract map,
