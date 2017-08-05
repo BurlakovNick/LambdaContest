@@ -6,11 +6,15 @@ namespace Core
 {
     public class RandomPunter: IPunter
     {
+        private PunterState state;
         private readonly Random random = new Random();
 
-        public void Init(Map map,
-                         int puntersCount,
-                         Punter punter)
+        public RandomPunter()
+        {
+            state = new PunterState();
+        }
+
+        public void Init(Map map, int puntersCount, Punter punter)
         {
         }
 
@@ -19,6 +23,12 @@ namespace Core
             return gameState.Map.Edges
                             .OrderBy(x => random.Next())
                             .FirstOrDefault(x => x.Punter == null);
+        }
+
+        public PunterState State
+        {
+            get => state;
+            set => state = value;
         }
     }
 }

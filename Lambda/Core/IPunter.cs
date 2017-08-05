@@ -6,5 +6,6 @@ namespace Core
     {
         void Init(Map map, int puntersCount, Punter punter);
         Edge Claim(GameState gameState);
+        PunterState State { get; set; }
     }
 }

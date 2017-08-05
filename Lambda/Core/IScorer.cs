@@ -7,5 +7,6 @@ namespace Core
         void Init(Map map);
         int Score(GameState gameState);
         int GetDistance(Node mine, Node node);
+        ScorerState State { get; set; }
     }
 }
