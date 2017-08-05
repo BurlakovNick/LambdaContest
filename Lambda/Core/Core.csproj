@@ -76,6 +76,7 @@
     <Compile Include="GraphVisitor.cs" />
     <Compile Include="GreedyComponent\Component.cs" />
     <Compile Include="GreedyComponent\GreedyComponentPunter.cs" />
+    <Compile Include="GreedyDesired\GreedyDesiredPunter.cs" />
     <Compile Include="IDistanceCalculator.cs" />
     <Compile Include="IGraphVisitor.cs" />
     <Compile Include="Infrastructure\Serializer.cs" />
