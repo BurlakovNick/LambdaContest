@@ -1,4 +1,8 @@
-﻿namespace OfflinePlayer
+﻿
+using System;
+using System.Threading;
+
+namespace OfflinePlayer
 {
     class Program
     {
@@ -6,6 +10,7 @@
         {
             var offlinePlayer = new OfflinePlayer();
             offlinePlayer.Play();
+            Thread.Sleep(TimeSpan.FromSeconds(10));
         }
     }
 }

@@ -67,6 +67,8 @@ namespace OfflinePlayer
                 {
                     throw new Exception($"Unknown message. {JsonConvert.SerializeObject(moveMessage, Formatting.Indented)}");
                 }
+
+                Log("Jobs done");
             }
             catch (Exception e)
             {
@@ -138,6 +140,8 @@ namespace OfflinePlayer
         private void Score(MoveMessage scoringMessage)
         {
             Log("Let's score");
+            //Не приходит GameState, пока так
+            return;
 
             var moves = scoringMessage.stop.moves;
             var scores = scoringMessage.stop.scores;
