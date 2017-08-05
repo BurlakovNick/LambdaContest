@@ -17,6 +17,7 @@ $(() => {
 
 function getClaimsFromText(text) {
     return text.split("\n")
+        .filter(x => x)
         .map(x => /(\d+): (\d+) (\d+)->(\d+)/.exec(x))
         .map(x => ({
             punter: x[2],
