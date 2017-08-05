@@ -9,7 +9,6 @@ using Core.Infrastructure;
 using Core.Objects;
 using Newtonsoft.Json;
 using SimpleTCP;
-using Message = SimpleTCP.Message;
 
 namespace Server
 {
@@ -64,9 +63,10 @@ namespace Server
             log($"Reply to handshake from {handshakeCommand.me}");
             message.Reply(serializer.Serialize(handshakeMessage));
 
+            var id = session.Clients.Count;
             var connection = new PlayerConnection(tcpClient: message.TcpClient,
-                                                  name: handshakeCommand.me,
-                                                  id: session.Clients.Count);
+                                                  name: handshakeCommand.me + " " + id,
+                                                  id: id);
             session.Clients.Add(connection);
 
             log($"{session.Clients.Count}/{session.PlayersCount} players handshook");
@@ -129,13 +129,25 @@ namespace Server
                 {
                     log($"Move {moveNumber}/{map.rivers.Length} by punter {connection.Name} with id {connection.Id}");
                     var reply = connection.Client.WriteAndGetReply(serializer.Serialize(lastMoves), TimeSpan.FromSeconds(1));
-                    var moveCommand = serializer.Deserialize<MoveCommand>(reply.MessageString);
-                    lastMoves.move.moves.RemoveAt(0);
-                    lastMoves.move.moves.Add(moveCommand);
-                    moves.Add(moveCommand);
+                    if (reply == null)
+                    {
+                        log($"Punter {connection.Id} passed");
+                        lastMoves.move.moves.Add(new MoveCommand { pass = new Pass { punter = connection.Id } });
+                    }
+                    else
+                    {
+                        var moveCommand = serializer.Deserialize<MoveCommand>(reply.MessageString);
+                        LogClaimToFile(moveNumber, moveCommand);
+                        lastMoves.move.moves.RemoveAt(0);
+                        lastMoves.move.moves.Add(moveCommand);
+                        moves.Add(moveCommand);
+                    }
                     if (moveNumber == map.rivers.Length)
                         break;
                     moveNumber++;
+
+                    if (moveNumber % 100 == 0)
+                        LogScores(map, moves);
                 }
             }
 
@@ -147,14 +159,8 @@ namespace Server
                              List<MoveCommand> moves)
         {
             log("SCORING!");
-            foreach (var (x, i) in moves.Where(x => x.claim != null)
-                                        .Select((x,
-                                                 i) => (x, i)))
-                Console.Out.WriteLine($"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}");
-            Console.Out.WriteLine();
 
             var mapInfo = Converter.Convert(map, moves);
-            
 
             var scores = session.Clients
                                 .Select((x,
@@ -196,6 +202,32 @@ namespace Server
             var fileContent = File.ReadAllText(filePath);
             var map = JsonConvert.DeserializeObject<MapContract>(fileContent);
             return map;
+        }
+
+        private static void LogClaimToFile(int i,
+                                           MoveCommand x)
+        {
+            File.AppendAllLines(@"C:\Users\mif\Desktop\moves.txt", new[] { $"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}" });
+        }
+
+        private void LogScores(MapContract map,
+                               List<MoveCommand> moves)
+        {
+            var mapInfo = Converter.Convert(map, moves);
+
+            var scores = session.Clients
+                                .Select((x,
+                                         i) => new GameState
+                                               {
+                                                   Map = mapInfo,
+                                                   CurrentPunter = new Punter { Id = i }
+                                               })
+                                .Select(x => (x.CurrentPunter, scorer.Score(x)))
+                                .ToArray();
+            foreach (var (score, i) in scores.OrderByDescending(x => x.Item2)
+                                             .Select((x,
+                                                      i) => (x, i)))
+                log($"#{i + 1} Punter {score.Item1.Id}, Score: {score.Item2}");
         }
     }
 }

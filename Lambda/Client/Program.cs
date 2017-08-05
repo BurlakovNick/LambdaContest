@@ -26,6 +26,9 @@ namespace Client
                     return new GreedyComponentPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
                 case "first":
                     return new AlwaysFirstPunter();
+                case "stupidgreedy":
+                    var visitor = new GraphVisitor();
+                    return new GreedyEdgeChooserPunter(new Scorer(new DistanceCalculator(), visitor), visitor);
                 case "random":
                 default:
                     return new RandomPunter();

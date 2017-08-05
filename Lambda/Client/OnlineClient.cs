@@ -31,7 +31,7 @@ namespace Client
             log("tcp client connected to server");
             tcpClient.DataReceived += TcpClient_DataReceived;
 
-            var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)}" };
+            var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)} {punter.GetType().Name}" };
             log($"Begin handshake as {handshakeCommand.me}");
             var reply = tcpClient.WriteAndGetReply(serializer.Serialize(handshakeCommand), TimeSpan.MaxValue);
             var handshakeMessage = serializer.Deserialize<HandshakeMessage>(reply.MessageString);
@@ -74,6 +74,8 @@ namespace Client
             session.setupMessage = setupMessage;
             session.MyId = setupMessage.punter;
             session.Map = Converter.Convert(setupMessage.map);
+
+            log($"##############################My Id is {session.MyId}");
 
             punter.Init(session.Map, setupMessage.punters, new Punter { Id = setupMessage.punter });
 
