@@ -8,10 +8,5 @@ namespace WebApp.Controllers
         {
             return View();
         }
-
-        public ActionResult Viewer()
-        {
-            return View();
-        }
     }
 }

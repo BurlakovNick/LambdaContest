@@ -1,4 +1,59 @@
-﻿const json = {
+﻿$(() => {
+    $("#moves").bind("input",
+        () => {
+            console.log("asdf");
+        });
+});
+
+function playClaims(claims) {
+    for (let i = 0; i < claims.length; i++) {
+        const claim = claims[i];
+        updateEdgeOwner(claim.punter, claim.source, claim.target);
+    }
+}
+
+function updateEdgeOwner(punter, source, target) {
+    const es = cy.edges("[source=\"" + source + "\"][target=\"" + target + "\"]");
+    if (es.length > 0) {
+        const e = es[0];
+        e.data()["owner"] = punter;
+        e.style("line-color", getPunterColour(punter));
+    } else {
+        throw new Error();
+    }
+}
+
+const colours =
+[
+    "#1f77b4",
+    "#aec7e8",
+    "#ff7f0e",
+    "#ffbb78",
+    "#2ca02c",
+    "#98df8a",
+    "#d62728",
+    "#ff9896",
+    "#9467bd",
+    "#c5b0d5",
+    "#8c564b",
+    "#c49c94",
+    "#e377c2",
+    "#f7b6d2",
+    "#7f7f7f",
+    "#c7c7c7",
+    "#bcbd22",
+    "#dbdb8d",
+    "#17becf",
+    "#9edae5"
+];
+
+function getPunterColour(punter) {
+    return colours[punter % colours.length];
+}
+
+//VIEWER
+
+const json = {
     "maps": [
         {
             "filename": "/maps/sample.json",
@@ -37,7 +92,7 @@
     ]
 };
 
-function loadMapList(showFirst) {
+function loadMapList() {
     const select_elem = $("#maps-select");
     const maps = json.maps;
 
@@ -48,15 +103,13 @@ function loadMapList(showFirst) {
         select_elem.append(opt);
     }
 
-    select_elem.change(function (evt) {
+    select_elem.change(function(evt) {
         const item = select_elem.find(":selected");
         //alert("selected " + item.text() + ", val: " + item.val());
         selectMap(item.val());
     });
 
-    if (showFirst) {
-        selectMap(maps[0].filename);
-    }
+    selectMap(maps[0].filename);
 }
 
 function selectMap(url) {
@@ -78,12 +131,5 @@ function selectMap(url) {
 }
 
 $(function() {
-    const matches = /map=([^&#=]*)/.exec(window.location.search);
-    if (matches !== null && matches !== undefined) {
-        const param1 = matches[1];
-        loadMapList(false);
-        selectMap(param1);
-    } else {
-        loadMapList(true);
-    }
+    loadMapList();
 });
