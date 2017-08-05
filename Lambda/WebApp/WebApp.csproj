@@ -148,7 +148,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\puntfx.css" />
     <Content Include="Content\viewer.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -158,7 +157,6 @@
     <Content Include="Scripts\fastclick.min.js" />
     <Content Include="Scripts\jquery.min.js" />
     <Content Include="Scripts\js-core.js" />
-    <Content Include="Scripts\puntfx.js" />
     <Content Include="Scripts\viewer.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -168,7 +166,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="Views\Web.config" />
-    <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -180,7 +177,7 @@
     <Content Include="Content\bootstrap.min.css" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\Viewer.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="maps\sample.json" />
