@@ -23,6 +23,7 @@ namespace Core
 
         public void Init(Map map, int puntersCount, Punter punter)
         {
+            scorer.Init(map);
         }
 
         public Edge Claim(GameState gameState)
