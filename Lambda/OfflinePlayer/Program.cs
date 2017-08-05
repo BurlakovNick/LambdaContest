@@ -9,9 +9,13 @@ namespace OfflinePlayer
     {
         static void Main(string[] args)
         {
-            var offlinePlayer = new OfflinePlayer(new RandomPunter());
+            var scorer = new Scorer(new DistanceCalculator(), new GraphVisitor());
+            var graphVisitor = new GraphVisitor();
+            var punter = new GreedyEdgeChooserPunter(scorer, graphVisitor);
+            var offlinePlayer = new OfflinePlayer(punter, scorer);
+
             offlinePlayer.Play();
-            Thread.Sleep(TimeSpan.FromSeconds(1));
+            Thread.Sleep(TimeSpan.FromSeconds(3));
         }
     }
 }

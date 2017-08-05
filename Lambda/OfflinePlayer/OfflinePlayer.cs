@@ -14,7 +14,6 @@ namespace OfflinePlayer
         private const string PlayerName = "BargeHauler";
         private readonly Transport transport;
         private readonly IScorer scorer;
-
         private readonly IPunter punter;
 
         private static void Log(string message)
@@ -22,14 +21,14 @@ namespace OfflinePlayer
             Console.Error.WriteLine(message);
         }
 
-        public OfflinePlayer(IPunter randomPunter)
+        public OfflinePlayer(IPunter randomPunter, IScorer scorer)
         {
             try
             {
                 Log("Init player");
 
+                this.scorer = scorer;
                 transport = new Transport();
-                scorer = new Scorer(new DistanceCalculator(), new GraphVisitor());
                 punter = randomPunter;
 
                 Log("Player initialized");

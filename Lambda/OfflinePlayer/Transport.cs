@@ -25,7 +25,7 @@ namespace OfflinePlayer
         {
             Log($"Lets recieve message");
 
-            var buffer = new char[4096];
+            var buffer = new char[1];
             var sb = new StringBuilder();
             var size = 0;
             while (true)
@@ -43,12 +43,9 @@ namespace OfflinePlayer
 
             Log($"Message size {size}");
 
-            for (var index = 0; index < size; index += buffer.Length)
-            {
-                var count = Math.Min(buffer.Length, size - index);
-                Console.In.ReadBlock(buffer, index, count);
-                sb.Append(buffer);
-            }
+            buffer = new char[size];
+            Console.In.ReadBlock(buffer, 0, size);
+            sb.Append(buffer);
 
             Log($"Recieve message {sb}");
 

@@ -40,6 +40,11 @@ namespace Core.Objects
                 .Where(e => e.Item2.Punter == null || e.Item2.Punter == punter)
                 .ToList();
 
+        public List<(Node, Edge)> GetFreeEdges(int fromNodeId) =>
+            nodeEdges[fromNodeId]
+                .Where(e => e.Item2.Punter == null)
+                .ToList();
+
         public void Claim(int source,
                           int target,
                           int punterId)
