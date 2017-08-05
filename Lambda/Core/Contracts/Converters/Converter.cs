@@ -10,7 +10,7 @@ namespace Core.Contracts.Converters
 		{
 			var mines = new HashSet<int>(mapContract.mines);
 			var nodes = mapContract.sites.Select(x => CreateNode(x.id, mines)).ToArray();
-			var edgeToPunters = moves
+			var edgeToPunters = (moves ?? new List<MoveCommand>())
 				.Where(x => x.claim != null)
 				.SelectMany(x => new[]
 								 {

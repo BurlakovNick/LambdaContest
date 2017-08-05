@@ -2,6 +2,7 @@
 {
 	public enum GameStatus
 	{
+		Handshake,
 		Setup,
 		Gameplay
 	}

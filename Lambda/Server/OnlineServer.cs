@@ -10,29 +10,44 @@ using SimpleTCP;
 
 namespace Server
 {
-	public class Server: IServer
+	public class OnlineServer: IServer
 	{
 		private readonly IScorer scorer;
+		private readonly string mapName;
+		private readonly Action<string> log;
 		private GameSession session;
 		private SimpleTcpServer tcpServer;
 
-		public Server(IScorer scorer)
+		public OnlineServer(IScorer scorer,
+							ILog log,
+							string mapName)
 		{
 			this.scorer = scorer;
+			this.mapName = mapName;
+			this.log = log.Log;
 		}
 
 		public void Start(int playersCount)
 		{
 			session = new GameSession(playersCount);
 			tcpServer = new SimpleTcpServer().Start(7777);
-			Console.WriteLine("Tcp Server listening...");
+			log("Tcp Server listening...");
 			tcpServer.DataReceived += TcpServer_DataReceived;
 		}
 
 		private void TcpServer_DataReceived(object sender,
 											Message e)
 		{
-			HandleHandshake(e);
+			try
+			{
+				log($"Handling message in TcpServer_DataReceived. Message: {e.MessageString}");
+				HandleHandshake(e);
+			}
+			catch (Exception exception)
+			{
+				log("ERROR " + exception);
+				throw;
+			}
 		}
 
 		private void HandleHandshake(Message message)
@@ -42,35 +57,41 @@ namespace Server
 								   {
 									   you = handshakeCommand.me
 								   };
+			log($"Reply to handshake from {handshakeCommand.me}");
 			message.Reply(JsonConvert.SerializeObject(handshakeMessage));
 
-			var connection = new PlayerConnection(message.TcpClient, handshakeCommand.me);
+			var connection = new PlayerConnection(tcpClient: message.TcpClient,
+												  name: handshakeCommand.me,
+												  id: session.Clients.Count);
 			session.Clients.Add(connection);
 
+			log($"{session.Clients.Count}/{session.PlayersCount} players handshook");
 			if (session.Clients.Count == session.PlayersCount)
 			{
 				tcpServer.DataReceived -= TcpServer_DataReceived;
+				log("All players handshook. Gonna setup.");
 				Setup();
 			}
 		}
 
 		private void Setup()
 		{
-			var map = GetMap("sample");
+			var map = GetMap(mapName);
 			scorer.Init(Converter.Convert(map));
-			foreach (var (x, i) in session.Clients.Select((x,
-														   i) => (x, i)))
+			foreach (var x in session.Clients)
 			{
 				var setupMessage = new SetupMessage
 								   {
-									   punter = i,
+									   punter = x.Id,
 									   punters = session.PlayersCount,
 									   map = map
 								   };
+				log($"Sending setup message to punter {x.Id}");
 				var reply = x.Client.WriteAndGetReply(JsonConvert.SerializeObject(setupMessage),
 													  TimeSpan.FromSeconds(10));
 				var setupCommand = JsonConvert.DeserializeObject<SetupCommand>(reply.MessageString);
-				if (setupCommand.ready != i)
+				log($"Punter {x.Id} is ready!");
+				if (setupCommand.ready != x.Id)
 					throw new Exception("ready must be equal to player id");
 			}
 
@@ -79,20 +100,20 @@ namespace Server
 
 		private void Game(MapContract map)
 		{
-			var moveNumber = 0;
+			log("Letsplay =)");
+			var moveNumber = 1;
 			var lastMoves = new MoveMessage
 							{
 								move = new MoveMessage.InternalMove
 									   {
 										   moves = session.Clients
-														  .Select((x,
-																   i) => new MoveCommand
-																		 {
-																			 pass = new Pass
-																					{
-																						punter = i
-																					}
-																		 })
+														  .Select(x => new MoveCommand
+																	   {
+																		   pass = new Pass
+																				  {
+																					  punter = x.Id
+																				  }
+																	   })
 														  .ToList()
 									   }
 							};
@@ -102,6 +123,7 @@ namespace Server
 			{
 				foreach (var connection in session.Clients)
 				{
+					log($"Move {moveNumber}/{map.rivers.Length} by punter {connection.Name} with id {connection.Id}");
 					var reply = connection.Client.WriteAndGetReply(JsonConvert.SerializeObject(lastMoves), TimeSpan.FromSeconds(1));
 					var moveCommand = JsonConvert.DeserializeObject<MoveCommand>(reply.MessageString);
 					lastMoves.move.moves.RemoveAt(0);
@@ -120,6 +142,7 @@ namespace Server
 							 MoveMessage lastMoves,
 							 MoveMessage moves)
 		{
+			log("SCORING!");
 			var mapInfo = Converter.Convert(map, moves.move.moves);
 
 			var scores = session.Clients
@@ -131,6 +154,10 @@ namespace Server
 											   })
 								.Select(x => (x.CurrentPunter, scorer.Score(x)))
 								.ToArray();
+			foreach (var (score, i) in scores.OrderBy(x => x.Item2)
+											 .Select((x,
+													  i) => (x, i)))
+				log($"#{i} Punter {score.Item1.Id}, Score: {score.Item2}");
 
 			foreach (var connection in session.Clients)
 			{

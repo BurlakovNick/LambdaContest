@@ -7,7 +7,9 @@ namespace Server
 	{
 		static void Main(string[] args)
 		{
-			IServer server = new Server(new Scorer(new DistanceCalculator(), new GraphVisitor()));
+			IServer server = new OnlineServer(new Scorer(new DistanceCalculator(), new GraphVisitor()),
+										new ConsoleLog(),
+										"sample");
 
 			server.Start(playersCount: 2);
 

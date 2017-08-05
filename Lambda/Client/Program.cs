@@ -1,14 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Core;
+using Core.GreedyComponent;
 
 namespace Client
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-        }
-    }
+	class Program
+	{
+		static void Main(string[] args)
+		{
+			var punter = new GreedyComponentPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
+			var log = new ConsoleLog();
+			var client = new OnlineClient(punter, log);
+			client.Start();
+			Console.ReadLine();
+		}
+	}
 }
