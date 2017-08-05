@@ -90,6 +90,7 @@
     <Compile Include="Objects\ScorerState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Objects\Punter.cs" />
+    <Compile Include="PunterFactory.cs" />
     <Compile Include="RandomPunter.cs" />
     <Compile Include="Scorer.cs" />
     <Compile Include="ShortestDistance.cs" />

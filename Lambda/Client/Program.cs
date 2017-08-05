@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Core;
 using Core.GreedyComponent;
 
@@ -10,7 +9,7 @@ namespace Client
         static void Main(string[] args)
         {
             var punterName = args[0];
-            
+
             var punter = GetPunter(punterName);
             var log = new ConsoleLog();
             var client = new OnlineClient(punter, log);
@@ -23,12 +22,11 @@ namespace Client
             switch (name)
             {
                 case "greedy":
-                    return new GreedyComponentPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
+                    return PunterFactory.Create(typeof(GreedyComponentPunter).Name);
                 case "first":
-                    return new AlwaysFirstPunter();
+                    return PunterFactory.Create(typeof(AlwaysFirstPunter).Name);
                 case "stupidgreedy":
-                    var visitor = new GraphVisitor();
-                    return new GreedyEdgeChooserPunter(new Scorer(new DistanceCalculator(), visitor), visitor);
+                    return PunterFactory.Create(typeof(GreedyEdgeChooserPunter).Name);
                 case "random":
                 default:
                     return new RandomPunter();
