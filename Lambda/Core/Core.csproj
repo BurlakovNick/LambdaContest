@@ -81,6 +81,7 @@
     <Compile Include="Infrastructure\ConsoleLog.cs" />
     <Compile Include="IPunter.cs" />
     <Compile Include="IScorer.cs" />
+    <Compile Include="Objects\PunterConnectedComponents.cs" />
     <Compile Include="Objects\Edge.cs" />
     <Compile Include="Objects\Game.cs" />
     <Compile Include="Objects\GameState.cs" />

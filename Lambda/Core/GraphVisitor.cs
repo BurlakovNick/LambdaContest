@@ -7,6 +7,43 @@ namespace Core
 {
     public class GraphVisitor : IGraphVisitor
     {
+        public PunterConnectedComponents GetConnectedComponents(Map map)
+        {
+            var connectedComponents = new PunterConnectedComponents();
+
+            var punters = map
+                .Edges
+                .Select(x => x.Punter)
+                .Where(x => x != null)
+                .Select(x => x.Id)
+                .Distinct()
+                .Select(x => new Punter {Id = x})
+                .ToArray();
+
+            var queue = new Queue<Node>();
+            foreach (var punter in punters)
+            {
+                var visitedNodeIds = new HashSet<int>();
+
+                foreach (var node in map.Nodes)
+                {
+                    if (visitedNodeIds.Contains(node.Id))
+                    {
+                        continue;
+                    }
+
+                    var component = new List<Node>();
+                    component.Add(AddNode(queue, visitedNodeIds, node));
+                    Bfs(map, punter, queue, visitedNodeIds, component);
+
+                    var nodeIds = component.Select(x => x.Id).ToArray();
+                    connectedComponents.AddComponent(nodeIds, punter.Id);
+                }
+            }
+
+            return connectedComponents;
+        }
+
         public Node[] GetReachableNodesFromMinesForPunter(Map map, Punter punter)
         {
             var result = new List<Node>();

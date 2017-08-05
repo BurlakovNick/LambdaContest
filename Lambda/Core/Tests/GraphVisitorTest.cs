@@ -38,6 +38,39 @@ namespace Core.Tests
             actual.ShouldAllBeEquivalentTo(new [] {node0, node1, node2, node3, node4, node5, node6, node7});
         }
 
+        [Test]
+        public void TestGetGetConnectedComponents()
+        {
+            var map = GetMapFromSampleA();
+            var graphVisitor = new GraphVisitor();
+            var actual = graphVisitor.GetConnectedComponents(map);
+
+            var component1 = new[] {node0, node1, node2, node3};
+            var component2 = new[] { node4, node5, node6, node7 };
+
+            CheckComponents(component1, component1, actual, myPunter.Id, true);
+            CheckComponents(component2, component2, actual, myPunter.Id, true);
+            CheckComponents(component1, component2, actual, myPunter.Id, false);
+
+            var component3 = new[] { node0, node1, node2, node7 };
+            var component4 = new[] { node3, node4, node5, node6 };
+
+            CheckComponents(component3, component3, actual, otherPunter.Id, true);
+            CheckComponents(component4, component4, actual, otherPunter.Id, true);
+            CheckComponents(component3, component4, actual, otherPunter.Id, false);
+        }
+
+        private static void CheckComponents(Node[] component1, Node[] component2, PunterConnectedComponents actual, int punterId, bool expected)
+        {
+            foreach (var left in component1)
+            {
+                foreach (var right in component2)
+                {
+                    actual.IsInSameComponent(left.Id, right.Id, punterId).Should().Be(expected, $"{left.Id} - {right.Id}, punter {punterId}");
+                }
+            }
+        }
+
         private static IEnumerable<TestCaseData> GenTests()
         {
             yield return new TestCaseData(
