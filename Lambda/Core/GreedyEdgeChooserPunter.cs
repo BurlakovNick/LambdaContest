@@ -51,7 +51,8 @@ namespace Core
 
             return map
                 .Edges
-                .OrderBy(x => Guid.NewGuid())
+                .OrderByDescending(x => CountEnemyNeighborEdges(gameState, x))
+                .ThenBy(x => Guid.NewGuid())
                 .FirstOrDefault(x => x.Punter == null);
         }
 
@@ -74,6 +75,12 @@ namespace Core
         {
             var reachableNodes = graphVisitor.GetReachableNodesFromMinesForPunter(map, punter);
             return new HashSet<int>(reachableNodes.Select(x => x.Id));
+        }
+
+        private int CountEnemyNeighborEdges(GameState gameState, Edge claimEdge)
+        {
+            return (gameState.Map.GetEdges(claimEdge.Source.Id).Count - gameState.Map.GetAvaliableEdges(claimEdge.Source.Id, gameState.CurrentPunter).Count) +
+                   (gameState.Map.GetEdges(claimEdge.Target.Id).Count - gameState.Map.GetAvaliableEdges(claimEdge.Target.Id, gameState.CurrentPunter).Count);
         }
 
         private int CountFreeNeighborEdges(GameState gameState, Edge claimEdge)
