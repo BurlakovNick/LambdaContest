@@ -8,7 +8,7 @@ namespace Core.GreedyComponent
     {
         public List<Node> Nodes { get; set; }
         public List<Node> Mines { get; set; }
-        public Dictionary<Node, int> Scores { get; set; }
+        public Dictionary<Node, int> Scores { get; set; } = new Dictionary<Node, int>();
 
         public Component(Node node, Node[] mines, IScorer scorer)
         {
@@ -17,7 +17,7 @@ namespace Core.GreedyComponent
             foreach (var mine in mines)
             {
                 var d = scorer.GetDistance(mine, node);
-                Scores[mine] = d * d;
+                Scores.Add(mine, d * d);
             }
         }
 

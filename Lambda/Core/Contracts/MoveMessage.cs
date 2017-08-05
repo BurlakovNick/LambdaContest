@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Core.Contracts
 {
@@ -17,8 +18,13 @@ namespace Core.Contracts
 
         public GameStateMessage state { get; set; }
 
+        [JsonIgnore]
         public bool IsSetup => map != null;
+
+        [JsonIgnore]
         public bool IsStop => stop != null;
+
+        [JsonIgnore]
         public bool IsGameplay => move != null;
 
         public class InternalMove

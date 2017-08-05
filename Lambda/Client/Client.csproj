@@ -45,11 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ext.cs" />
     <Compile Include="GameSession.cs" />
     <Compile Include="GameStatus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Client.cs" />
+    <Compile Include="OnlineClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
