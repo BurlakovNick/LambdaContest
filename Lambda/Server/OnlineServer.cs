@@ -160,21 +160,7 @@ namespace Server
         {
             log("SCORING!");
 
-            var mapInfo = Converter.Convert(map, moves);
-
-            var scores = session.Clients
-                                .Select((x,
-                                         i) => new GameState
-                                               {
-                                                   Map = mapInfo,
-                                                   CurrentPunter = new Punter { Id = i }
-                                               })
-                                .Select(x => (x.CurrentPunter, scorer.Score(x)))
-                                .ToArray();
-            foreach (var (score, i) in scores.OrderByDescending(x => x.Item2)
-                                             .Select((x,
-                                                      i) => (x, i)))
-                log($"#{i + 1} Punter {score.Item1.Id}, Score: {score.Item2}");
+            var scores = LogScores(map, moves);
 
             foreach (var connection in session.Clients)
             {
@@ -210,8 +196,8 @@ namespace Server
             File.AppendAllLines(@"C:\Users\mif\Desktop\moves.txt", new[] { $"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}" });
         }
 
-        private void LogScores(MapContract map,
-                               List<MoveCommand> moves)
+        private (Punter, int)[] LogScores(MapContract map,
+                                          List<MoveCommand> moves)
         {
             var mapInfo = Converter.Convert(map, moves);
 
@@ -228,6 +214,8 @@ namespace Server
                                              .Select((x,
                                                       i) => (x, i)))
                 log($"#{i + 1} Punter {score.Item1.Id}, Score: {score.Item2}");
+
+            return scores;
         }
     }
 }
