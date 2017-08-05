@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Core.Contracts
 {
@@ -7,6 +8,7 @@ namespace Core.Contracts
 		public InternalMove move { get; set; }
 		public InternalStop stop { get; set; }
 
+        [JsonIgnore]
 		public bool IsStop => stop != null;
 
 		public class InternalMove

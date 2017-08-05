@@ -8,7 +8,8 @@ namespace Client
 	{
 		static void Main(string[] args)
 		{
-			var punter = new GreedyComponentPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
+			//var punter = new GreedyComponentPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
+			var punter = new RandomPunter();
 			var log = new ConsoleLog();
 			var client = new OnlineClient(punter, log);
 			client.Start();
