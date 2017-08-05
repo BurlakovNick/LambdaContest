@@ -9,16 +9,24 @@ namespace Core
     {
         private readonly IDistanceCalculator distanceCalculator;
         private readonly IGraphVisitor graphVisitor;
-        private readonly Dictionary<(int, int), int> distancesFromMines;
+        private ScorerState state;
 
         public Scorer(
             IDistanceCalculator distanceCalculator,
-            IGraphVisitor graphVisitor
-            )
+            IGraphVisitor graphVisitor)
         {
             this.distanceCalculator = distanceCalculator;
             this.graphVisitor = graphVisitor;
-            distancesFromMines = new Dictionary<(int, int), int>();
+            state = new ScorerState
+            {
+                DistancesFromMines = new Dictionary<(int, int), int>()
+            };
+        }
+
+        public ScorerState State
+        {
+            get => state;
+            set => state = value;
         }
 
         public void Init(Map map)
@@ -32,7 +40,7 @@ namespace Core
                     var from = shortestDistance.From.Id;
                     var to = shortestDistance.To.Id;
 
-                    distancesFromMines[(from, to)] = shortestDistance.Length;
+                    state.DistancesFromMines[(from, to)] = shortestDistance.Length;
                 }
             }
         }
@@ -57,7 +65,7 @@ namespace Core
 
         public int GetDistance(Node from, Node to)
         {
-            if (distancesFromMines.TryGetValue((from.Id, to.Id), out var dist))
+            if (state.DistancesFromMines.TryGetValue((from.Id, to.Id), out var dist))
             {
                 return dist;
             }
