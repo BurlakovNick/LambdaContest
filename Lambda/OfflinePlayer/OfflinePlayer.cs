@@ -22,7 +22,7 @@ namespace OfflinePlayer
             Console.Error.WriteLine(message);
         }
 
-        public OfflinePlayer()
+        public OfflinePlayer(IPunter randomPunter)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace OfflinePlayer
 
                 transport = new Transport();
                 scorer = new Scorer(new DistanceCalculator(), new GraphVisitor());
-                punter = new RandomPunter();
+                punter = randomPunter;
 
                 Log("Player initialized");
             }
