@@ -22,7 +22,7 @@ namespace OfflinePlayer
             Console.Error.WriteLine(message);
         }
 
-        public OfflinePlayer()
+        public OfflinePlayer(IPunter randomPunter)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace OfflinePlayer
 
                 transport = new Transport();
                 scorer = new Scorer(new DistanceCalculator(), new GraphVisitor());
-                punter = new RandomPunter();
+                punter = randomPunter;
 
                 Log("Player initialized");
             }
@@ -67,6 +67,8 @@ namespace OfflinePlayer
                 {
                     throw new Exception($"Unknown message. {JsonConvert.SerializeObject(moveMessage, Formatting.Indented)}");
                 }
+
+                Log("Jobs done");
             }
             catch (Exception e)
             {
@@ -138,6 +140,8 @@ namespace OfflinePlayer
         private void Score(MoveMessage scoringMessage)
         {
             Log("Let's score");
+            //Не приходит GameState, пока так
+            return;
 
             var moves = scoringMessage.stop.moves;
             var scores = scoringMessage.stop.scores;
