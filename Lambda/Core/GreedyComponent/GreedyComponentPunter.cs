@@ -12,10 +12,12 @@ namespace Core.GreedyComponent
         private HashSet<Component> desiredComponent;
         private int movesCount;
         private Component first;
+        private PunterState state;
 
         public GreedyComponentPunter(IScorer scorer)
         {
             this.scorer = scorer;
+            state = new PunterState();
         }
 
         public void Init(Map map, int puntersCount, Punter punter)
@@ -92,6 +94,12 @@ namespace Core.GreedyComponent
                     dfs(neighbour, state, visited, nodeToComponent);
                 }
             }
+        }
+
+        public PunterState State
+        {
+            get => state;
+            set => state = value;
         }
 
         private void FindDesiredComponent(Map map, Punter punter)
