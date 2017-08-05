@@ -40,7 +40,7 @@ namespace Core.GreedyComponent
                 FindDesiredComponent(gameState.Map, gameState.CurrentPunter);
             }
 
-            var edgePower = new Dictionary<Edge, int>();
+            var edgePower = new Dictionary<Edge, (int, Component)>();
             var grey = new List<(Component, Edge)>();
             var color = new Dictionary<Component, int>();
             calculatePower(first, edgePower, grey, gameState, color, nodeToComponent);
@@ -58,7 +58,7 @@ namespace Core.GreedyComponent
             return claimedEdge;
         }
 
-        private void calculatePower(Component v, Dictionary<Edge, int> edgePower, List<(Component, Edge)> grey, GameState state, Dictionary<Component, int> color, Dictionary<int, Component> nodeToComponent)
+        private void calculatePower(Component v, Dictionary<Edge, (int, Component)> edgePower, List<(Component, Edge)> grey, GameState state, Dictionary<Component, int> color, Dictionary<int, Component> nodeToComponent)
         {
             color[v] = 1;
             v.SubtreeSize = 1;
@@ -74,7 +74,7 @@ namespace Core.GreedyComponent
                 {
                     var edge = neighbour.First().Item2;
                     grey.Add((neighbour.Key, edge));
-                    edgePower[edge] = 0;
+                    edgePower[edge] = (0, neighbour.Key);
                     calculatePower(neighbour.Key, edgePower, grey, state, color, nodeToComponent);
                     v.SubtreeSize += neighbour.Key.SubtreeSize;
                 }
@@ -87,7 +87,8 @@ namespace Core.GreedyComponent
                         {
                             break;
                         }
-                        edgePower[grey[i].Item2] += power;
+                        var cur = edgePower[grey[i].Item2];
+                        edgePower[grey[i].Item2] = (cur.Item1 + power, cur.Item2);
                     }
                 }
             }
