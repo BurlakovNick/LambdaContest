@@ -13,39 +13,47 @@ namespace Referee
     {
         static void Main(string[] args)
         {
+            Run(args);
+        }
+
+        private static void Run(string[] punters)
+        {
             Log("#################################################");
-            Log(string.Join(" VS ", args));
+            Log(string.Join(" VS ", punters));
             Log("#################################################");
             var maps = GetAllMaps();
             var i = 1;
             foreach (var map in maps)
             {
-                Log($"Round {i}/{maps.Length}");
-                Log($"Map: {map}");
-
-                Log("Runing server...");
-                var serverTask = Task.Run(() => RunServer(map, args.Length));
-
-                Log("Runing clients...");
-                var clientsTasks = new List<Task>();
-                foreach (var punterName in args)
+                try
                 {
-                    var thePunterName = punterName;
-                    clientsTasks.Add(Task.Run(() => RunClient(thePunterName)));
+                    Log($"Round {i}/{maps.Length}");
+                    Log($"Map: {map}");
+
+                    var serverTask = Task.Run(() => RunServer(map, punters.Length));
+
+                    var clientsTasks = new List<Task>();
+                    foreach (var punterName in punters)
+                    {
+                        var thePunterName = punterName;
+                        clientsTasks.Add(Task.Run(() => RunClient(thePunterName)));
+                    }
+
+                    Task.WaitAll(clientsTasks.Concat(new[] { serverTask }).ToArray());
+
+                    Log("Scores:");
+                    var scores = GetScores();
+                    foreach (var score in scores.OrderByDescending(x => x.Item2.Score))
+                        Log($"{score.Item1.Name}:\t{score.Item2.Score}");
+
+                    Log("#################################################");
+                    i++;
+                    Thread.Sleep(2000);
                 }
-
-                Log("Wait round ends...");
-                Task.WaitAll(clientsTasks.Concat(new[] { serverTask }).ToArray());
-
-                Log("Round finished");
-                Log("Scores:");
-                var scores = GetScores();
-                foreach (var score in scores.OrderByDescending(x => x.Item2.Score))
-                    Log($"{score.Item1.Name}:\t{score.Item2.Score}");
-
-                Log("#################################################");
-                i++;
-                Thread.Sleep(2000);
+                catch (Exception e)
+                {
+                    Log("Error: " + e.Message);
+                }
             }
         }
 
