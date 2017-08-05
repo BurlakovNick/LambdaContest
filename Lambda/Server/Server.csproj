@@ -56,18 +56,28 @@
     <Content Include="Maps\lambda.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Maps\boston-sparse.json" />
+    <None Include="Maps\circle.json" />
+    <None Include="Maps\edinburgh-sparse.json" />
+    <None Include="Maps\gothenburg-sparse.json" />
+    <None Include="Maps\nara-sparse.json" />
+    <None Include="Maps\oxford-center-sparse.json" />
     <None Include="Maps\oxford.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Maps\oxford2-sparse-2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Maps\randomMedium.json" />
+    <None Include="Maps\randomSparse.json" />
     <None Include="Maps\sample.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Maps\Sierpinski-triangle.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Maps\tube.json" />
+    <None Include="Maps\van-city-sparse.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

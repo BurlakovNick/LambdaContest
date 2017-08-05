@@ -192,6 +192,20 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="maps\boston-sparse.json" />
+    <Content Include="maps\circle.json" />
+    <Content Include="maps\edinburgh-sparse.json" />
+    <Content Include="maps\gothenburg-sparse.json" />
+    <Content Include="maps\nara-sparse.json" />
+    <Content Include="maps\oxford-center-sparse.json" />
+    <Content Include="maps\oxford.json" />
+    <Content Include="maps\randomMedium.json" />
+    <Content Include="maps\randomSparse.json" />
+    <Content Include="maps\Sierpinski-triangle.json" />
+    <Content Include="maps\tube.json" />
+    <Content Include="maps\van-city-sparse.json" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

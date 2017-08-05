@@ -94,6 +94,7 @@ namespace Client
             if (moveMessage.IsStop)
             {
                 ShowScores(moveMessage.stop.scores);
+                Environment.Exit(0);
             }
             else
             {
