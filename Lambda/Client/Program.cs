@@ -2,6 +2,7 @@
 using System.Linq;
 using Core;
 using Core.GreedyComponent;
+using Core.GreedyDesired;
 
 namespace Client
 {
@@ -24,6 +25,8 @@ namespace Client
             {
                 case "greedy":
                     return new GreedyComponentPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
+                case "greedydesired":
+                    return new GreedyDesiredPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
                 case "first":
                     return new AlwaysFirstPunter();
                 case "stupidgreedy":
