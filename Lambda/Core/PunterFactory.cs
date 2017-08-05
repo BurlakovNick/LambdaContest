@@ -16,7 +16,7 @@ namespace Core
                     return new GreedyDesiredPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
                 case "AlwaysFirstPunter":
                     return new AlwaysFirstPunter();
-                case "GraphVisitor":
+                case "GreedyEdgeChooserPunter":
                     var visitor = new GraphVisitor();
                     return new GreedyEdgeChooserPunter(new Scorer(new DistanceCalculator(), visitor), visitor);
                 case "RandomPunter":
