@@ -39,6 +39,9 @@
     <Reference Include="JetBrains.Annotations, Version=11.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\packages\JetBrains.Annotations.11.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=3.7.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
@@ -73,6 +76,7 @@
     <Compile Include="GreedyComponent\GreedyComponentPunter.cs" />
     <Compile Include="IDistanceCalculator.cs" />
     <Compile Include="IGraphVisitor.cs" />
+    <Compile Include="Infrastructure\Serializer.cs" />
     <Compile Include="Infrastructure\ILog.cs" />
     <Compile Include="Infrastructure\ConsoleLog.cs" />
     <Compile Include="IPunter.cs" />
@@ -84,6 +88,7 @@
     <Compile Include="Objects\Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Objects\Punter.cs" />
+    <Compile Include="RandomPunter.cs" />
     <Compile Include="Scorer.cs" />
     <Compile Include="ShortestDistance.cs" />
     <Compile Include="Tests\DistanceCalculatorTest.cs" />
