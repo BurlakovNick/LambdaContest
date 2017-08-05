@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlwaysFirstPunter.cs" />
     <Compile Include="Contracts\Claim.cs" />
     <Compile Include="Contracts\Converters\Converter.cs" />
     <Compile Include="Contracts\HandshakeCommand.cs" />
