@@ -31,8 +31,7 @@ namespace Core
             var map = gameState.Map;
             var punter = gameState.CurrentPunter;
 
-            var reachableNodes = graphVisitor.GetReachableNodesFromMinesForPunter(map, punter);
-            var reachableNodeIds = new HashSet<int>(reachableNodes.Select(x => x.Id));
+            var reachableNodeIds = GetReachableNodesFromMines(map, punter);
 
             var bestIncreasingPathEdge = map
                 .Edges
@@ -41,7 +40,7 @@ namespace Core
                             reachableNodeIds.Contains(x.Target.Id) ||
                             x.Source.IsMine ||
                             x.Target.IsMine)
-                .OrderByDescending(x => GetWeight(gameState, x, punter))
+                .OrderByDescending(x => GetWeight(gameState, x, punter, reachableNodeIds))
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .FirstOrDefault();
 
@@ -56,12 +55,25 @@ namespace Core
                 .FirstOrDefault(x => x.Punter == null);
         }
 
-        private int GetWeight(GameState gameState, Edge claimEdge, Punter punter)
+        private int GetWeight(GameState gameState, Edge claimEdge, Punter punter, HashSet<int> reachableNodeIds)
         {
             claimEdge.Punter = punter;
+
+            if (GetReachableNodesFromMines(gameState.Map, punter).Count == reachableNodeIds.Count)
+            {
+                claimEdge.Punter = null;
+                return 0;
+            }
+
             var newScore = scorer.Score(gameState);
             claimEdge.Punter = null;
             return newScore;
+        }
+
+        private HashSet<int> GetReachableNodesFromMines(Map map, Punter punter)
+        {
+            var reachableNodes = graphVisitor.GetReachableNodesFromMinesForPunter(map, punter);
+            return new HashSet<int>(reachableNodes.Select(x => x.Id));
         }
 
         private int CountFreeNeighborEdges(GameState gameState, Edge claimEdge)
