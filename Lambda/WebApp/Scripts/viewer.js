@@ -1,14 +1,37 @@
-﻿$(() => {
+﻿let currentMoves = null;
+
+$(() => {
     $("#moves").bind("input",
-        () => {
-            console.log("asdf");
+        (ev) => {
+            const text = ev.currentTarget.value;
+            currentMoves = getClaimsFromText(text);
+            $("#moveNumber").val(currentMoves.length);
+            playClaims(currentMoves, currentMoves.length);
         });
+
+    $("#moveNumber").change((ev) => {
+        const moveNumber = Number(ev.currentTarget.value);
+        playClaims(currentMoves, moveNumber);
+    });
 });
 
-function playClaims(claims) {
+function getClaimsFromText(text) {
+    return text.split("\n")
+        .map(x => /(\d+): (\d+) (\d+)->(\d+)/.exec(x))
+        .map(x => ({
+            punter: x[2],
+            source: x[3],
+            target: x[4]
+        }));
+}
+
+function playClaims(claims, take) {
     for (let i = 0; i < claims.length; i++) {
         const claim = claims[i];
-        updateEdgeOwner(claim.punter, claim.source, claim.target);
+        const punter = i > take - 1
+            ? null
+            : claim.punter;
+        updateEdgeOwner(punter, claim.source, claim.target);
     }
 }
 
@@ -48,7 +71,9 @@ const colours =
 ];
 
 function getPunterColour(punter) {
-    return colours[punter % colours.length];
+    return punter == null
+        ? "#009"
+        : colours[punter % colours.length];
 }
 
 //VIEWER
