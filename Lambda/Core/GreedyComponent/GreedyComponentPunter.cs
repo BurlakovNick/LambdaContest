@@ -22,6 +22,7 @@ namespace Core.GreedyComponent
 
         public void Init(Map map, int puntersCount, Punter punter)
         {
+            scorer.Init(map);
             movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
             mines = map.Nodes.Where(n => n.IsMine).ToArray();
             components = map.Nodes.Select(n => new Component(n, mines, scorer)).ToList();
@@ -41,15 +42,19 @@ namespace Core.GreedyComponent
 
             var edgePower = new Dictionary<Edge, int>();
             var grey = new List<(Component, Edge)>();
-            visited.Clear();
-            calculatePower(first, edgePower, grey, gameState, visited, nodeToComponent);
+            var color = new Dictionary<Component, int>();
+            calculatePower(first, edgePower, grey, gameState, color, nodeToComponent);
 
+            if (!edgePower.Any())
+            {
+                return gameState.Map.Edges.First(e => e.Punter == null);
+            }
             return edgePower.OrderBy(x => x.Value).First().Key;
         }
 
-        private void calculatePower(Component v, Dictionary<Edge, int> edgePower, List<(Component, Edge)> grey, GameState state, HashSet<Component> visited, Dictionary<int, Component> nodeToComponent)
+        private void calculatePower(Component v, Dictionary<Edge, int> edgePower, List<(Component, Edge)> grey, GameState state, Dictionary<Component, int> color, Dictionary<int, Component> nodeToComponent)
         {
-            visited.Add(v);
+            color[v] = 1;
             var neighbours = v.Nodes
                 .SelectMany(n => state.Map.GetAvaliableEdges(n.Id, state.CurrentPunter))
                 .GroupBy(n => nodeToComponent[n.Item1.Id])
@@ -58,14 +63,15 @@ namespace Core.GreedyComponent
             foreach (var neighbour in neighbours)
             {
                 var power = neighbour.Count();
-                if (!visited.Contains(neighbour.Key))
+                if (!color.ContainsKey(neighbour.Key))
                 {
                     var edge = neighbour.First().Item2;
                     grey.Add((neighbour.Key, edge));
-                    edgePower[edge] = power;
-                    calculatePower(neighbour.Key, edgePower, grey, state, visited, nodeToComponent);
+                    edgePower[edge] = 0;
+                    calculatePower(neighbour.Key, edgePower, grey, state, color, nodeToComponent);
                 }
                 else
+                if (color[neighbour.Key] == 1)
                 {
                     for (int i = grey.Count - 1; i >= 0; --i)
                     {
@@ -78,7 +84,11 @@ namespace Core.GreedyComponent
                 }
             }
 
-            grey.RemoveAt(grey.Count - 1);
+            color[v] = 2;
+            if (grey.Any())
+            {
+                grey.RemoveAt(grey.Count - 1);
+            }
         }
 
         private void dfs(Component v, GameState state, HashSet<Component> visited, Dictionary<int, Component> nodeToComponent)
@@ -114,15 +124,15 @@ namespace Core.GreedyComponent
             var nodeToComponent = BuildNodeToComponent();
 
             desiredComponent = new HashSet<Component> {first};
-            var S = new SortedSet<KeyValuePair<int, Component>>();
+            var S = new SortedSet<(int, Component)>();
             foreach (var c in first.Nodes.SelectMany(n => map.GetAvaliableEdges(n.Id, punter).Select(e => nodeToComponent[e.Item1.Id])).Distinct())
             {
-                S.Add(new KeyValuePair<int, Component>(first.Mines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]), c));
+                S.Add((first.Mines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]), c));
             }
 
             for (int i = 0; i < movesCount; ++i)
             {
-                while (S.Count != 0 && desiredComponent.Contains(S.Max.Value))
+                while (S.Count != 0 && desiredComponent.Contains(S.Max.Item2))
                 {
                     S.Remove(S.Max);
                 }
@@ -130,7 +140,7 @@ namespace Core.GreedyComponent
                 {
                     break;
                 }
-                var newComponent = S.Max.Value;
+                var newComponent = S.Max.Item2;
                 desiredComponent.Add(newComponent);
                 S.Remove(S.Max);
 
@@ -143,14 +153,14 @@ namespace Core.GreedyComponent
                 {
                     foreach (var c in components.Where(c => !desiredComponent.Contains(c)))
                     {
-                        S.Add(new KeyValuePair<int, Component>(desiredMines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]), c));
+                        S.Add((desiredMines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]), c));
                     }
                 }
                 else
                 {
                     foreach (var c in newComponent.Nodes.SelectMany(n => map.GetAvaliableEdges(n.Id, punter).Select(e => nodeToComponent[e.Item1.Id])).Distinct())
                     {
-                        S.Add(new KeyValuePair<int, Component>(desiredMines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]), c));
+                        S.Add((desiredMines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]), c));
                     }
                 }
             }

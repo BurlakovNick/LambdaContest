@@ -9,6 +9,7 @@ using Core.Infrastructure;
 using Core.Objects;
 using Newtonsoft.Json;
 using SimpleTCP;
+using Message = SimpleTCP.Message;
 
 namespace Server
 {
@@ -146,7 +147,14 @@ namespace Server
                              List<MoveCommand> moves)
         {
             log("SCORING!");
+            foreach (var (x, i) in moves.Where(x => x.claim != null)
+                                        .Select((x,
+                                                 i) => (x, i)))
+                Console.Out.WriteLine($"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}");
+            Console.Out.WriteLine();
+
             var mapInfo = Converter.Convert(map, moves);
+            
 
             var scores = session.Clients
                                 .Select((x,
@@ -160,7 +168,7 @@ namespace Server
             foreach (var (score, i) in scores.OrderByDescending(x => x.Item2)
                                              .Select((x,
                                                       i) => (x, i)))
-                log($"#{i+1} Punter {score.Item1.Id}, Score: {score.Item2}");
+                log($"#{i + 1} Punter {score.Item1.Id}, Score: {score.Item2}");
 
             foreach (var connection in session.Clients)
             {

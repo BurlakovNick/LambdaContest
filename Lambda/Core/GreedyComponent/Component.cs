@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Objects;
 
 namespace Core.GreedyComponent
 {
-    public class Component
+    public class Component : IComparable
     {
         public List<Node> Nodes { get; set; }
         public List<Node> Mines { get; set; }
@@ -29,6 +30,11 @@ namespace Core.GreedyComponent
             {
                 Scores[score.Key] += score.Value;
             }
+        }
+
+        public int CompareTo(object obj)
+        {
+            return GetHashCode() - obj.GetHashCode();
         }
     }
 }
