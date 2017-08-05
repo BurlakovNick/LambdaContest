@@ -10,6 +10,7 @@ namespace Core.GreedyComponent
         public List<Node> Nodes { get; set; }
         public List<Node> Mines { get; set; }
         public Dictionary<int, int> Scores { get; set; } = new Dictionary<int, int>();
+        public int SubtreeSize { get; set; }
 
         public Component(Node node, Node[] mines, IScorer scorer)
         {
@@ -34,6 +35,10 @@ namespace Core.GreedyComponent
 
         public int CompareTo(object obj)
         {
+            if (SubtreeSize != ((Component) obj).SubtreeSize)
+            {
+                return ((Component) obj).SubtreeSize - SubtreeSize;
+            }
             return GetHashCode() - obj.GetHashCode();
         }
     }

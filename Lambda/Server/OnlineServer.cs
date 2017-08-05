@@ -105,6 +105,10 @@ namespace Server
         private void Game(MapContract map)
         {
             log("Letsplay =)");
+            if (File.Exists("moves.txt"))
+            {
+                File.Delete("moves.txt");
+            }
             var moveNumber = 1;
             var lastMoves = new MoveMessage
                             {
@@ -193,7 +197,7 @@ namespace Server
         private static void LogClaimToFile(int i,
                                            MoveCommand x)
         {
-            File.AppendAllLines(@"C:\Users\mif\Desktop\moves.txt", new[] { $"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}" });
+            File.AppendAllLines("moves.txt", new[] { $"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}" });
         }
 
         private (Punter, int)[] LogScores(MapContract map,

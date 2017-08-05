@@ -61,6 +61,7 @@ namespace Core.GreedyComponent
         private void calculatePower(Component v, Dictionary<Edge, int> edgePower, List<(Component, Edge)> grey, GameState state, Dictionary<Component, int> color, Dictionary<int, Component> nodeToComponent)
         {
             color[v] = 1;
+            v.SubtreeSize = 1;
             var neighbours = v.Nodes
                 .SelectMany(n => state.Map.GetAvaliableEdges(n.Id, state.CurrentPunter))
                 .GroupBy(n => nodeToComponent[n.Item1.Id])
@@ -75,6 +76,7 @@ namespace Core.GreedyComponent
                     grey.Add((neighbour.Key, edge));
                     edgePower[edge] = 0;
                     calculatePower(neighbour.Key, edgePower, grey, state, color, nodeToComponent);
+                    v.SubtreeSize += neighbour.Key.SubtreeSize;
                 }
                 else
                 if (color[neighbour.Key] == 1)
