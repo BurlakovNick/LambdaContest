@@ -148,11 +148,21 @@ function selectMap(url) {
             initCy(json,
                 function() {
                     cy.autolock(true);
+                    bindCoreHandlers();
                     cy.edges().on("select", function(evt) { cy.edges().unselect() });
                 });
         });
 
     $("#download-link").attr("href", url);
+}
+
+function bindCoreHandlers() {
+    cy.edges().on("mouseover", function (evt) {
+        this.style("content", this.data("owner"));
+    });
+    cy.edges().on("mouseout", function (evt) {
+        this.style("content", "");
+    });
 }
 
 $(function() {
