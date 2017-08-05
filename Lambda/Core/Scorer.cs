@@ -19,7 +19,7 @@ namespace Core
             this.graphVisitor = graphVisitor;
             state = new ScorerState
             {
-                DistancesFromMines = new Dictionary<(int, int), int>()
+                DistancesFromMines = new Dictionary<int, Dictionary<int, int>>()
             };
         }
 
@@ -35,12 +35,13 @@ namespace Core
             foreach (var mine in mines)
             {
                 var shortestDistances = distanceCalculator.GetShortest(mine, map);
+                state.DistancesFromMines[mine.Id] = new Dictionary<int, int>();
                 foreach (var shortestDistance in shortestDistances)
                 {
                     var from = shortestDistance.From.Id;
                     var to = shortestDistance.To.Id;
 
-                    state.DistancesFromMines[(from, to)] = shortestDistance.Length;
+                    state.DistancesFromMines[from][to] = shortestDistance.Length;
                 }
             }
         }
@@ -65,7 +66,7 @@ namespace Core
 
         public int GetDistance(Node from, Node to)
         {
-            if (state.DistancesFromMines.TryGetValue((from.Id, to.Id), out var dist))
+            if (state.DistancesFromMines[from.Id].TryGetValue(to.Id, out var dist))
             {
                 return dist;
             }
