@@ -1,1 +1,1 @@
-start Server\bin\Debug\Server.exe lambda 2
+start Server\bin\Debug\Server.exe oxford2-sparse-2 16

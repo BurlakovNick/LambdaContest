@@ -70,6 +70,8 @@ namespace Distributor
                     Log($"Error: {e.Message}");
                     queue.Enqueue(battle);
                 }
+
+                Log($"{queue.Count} left!");
             }
         }
 
@@ -120,19 +122,46 @@ namespace Distributor
 
         private static IEnumerable<string[]> GetAllBattles(string[] allPunters)
         {
-            foreach (var x in allPunters)
+            /*foreach (var x in allPunters)
             foreach (var y in allPunters)
                 yield return new[] { x, y };
 
-            foreach (var x in allPunters)
-            foreach (var y in allPunters)
-            foreach (var z in allPunters)
-                yield return new[] { x, y, z };
+            yield return new[]
+                         {
+                             "FriendshipPunter",
+                             "BargeHauler3",
+                             "BargeHauler4",
+                             "MineConnecterPunter",
+                             "MineConnecterFullPunter",
+                             "BargeHauler5",
+                             "BargeHauler6",
+                             "BargeHauler7",
+                         };
+
+            yield return new[]
+                         {
+                             "FriendshipPunter",
+                             "BargeHauler3",
+                             "BargeHauler4",
+                             "MineConnecterPunter",
+                             "MineConnecterFullPunter",
+                             "BargeHauler5",
+                             "BargeHauler6",
+                             "BargeHauler7",
+                             "FriendshipPunter",
+                             "BargeHauler3",
+                             "BargeHauler4",
+                             "MineConnecterPunter",
+                             "MineConnecterFullPunter",
+                             "BargeHauler5",
+                             "BargeHauler6",
+                             "BargeHauler7",
+                         };*/
 
             foreach (var x in allPunters)
-            foreach (var y in allPunters)
-            foreach (var z in allPunters)
-            foreach (var k in allPunters)
+            foreach (var y in allPunters.Except(new[] { x }))
+            foreach (var z in allPunters.Except(new[] { x, y }))
+            foreach (var k in allPunters.Except(new[] { x, y, z }))
                 yield return new[] { x, y, z, k };
         }
 
@@ -140,11 +169,14 @@ namespace Distributor
         {
             return new[]
                    {
-                       typeof(MineConnecterPunter),
+                       typeof(FriendshipPunter),
                        typeof(BargeHauler3),
                        typeof(BargeHauler4),
-                       typeof(BargeHauler2),
-                       typeof(BargeHauler)
+                       typeof(MineConnecterPunter),
+                       typeof(MineConnecterFullPunter),
+                       typeof(BargeHauler5),
+                       typeof(BargeHauler6),
+                       typeof(BargeHauler7)
                    }
                 .Select(x => x.Name)
                 .ToArray();

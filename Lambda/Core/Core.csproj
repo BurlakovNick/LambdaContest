@@ -97,6 +97,7 @@
     <Compile Include="IScorer.cs" />
     <Compile Include="MineConnecterFullPunter.cs" />
     <Compile Include="FriendshipPunter.cs" />
+    <Compile Include="MaxConnecterPunter.cs" />
     <Compile Include="MineConnecterPunter.cs" />
     <Compile Include="Objects\PunterConnectedComponents.cs" />
     <Compile Include="Objects\Edge.cs" />

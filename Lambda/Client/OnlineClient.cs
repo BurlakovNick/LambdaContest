@@ -24,20 +24,26 @@ namespace Client
 
         public void Start(string server, string port)
         {
-	        ClearLogFiles();
-            session = new GameSession();
+            try
+            {
+                session = new GameSession();
 
-            var tcpClient = new SimpleTcpClient().Connect(server, int.Parse(port));
-            Log("tcp client connected to server");
+                var tcpClient = new SimpleTcpClient().Connect(server, int.Parse(port));
+                Log("tcp client connected to server");
 
-            var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)} {punter.GetType().Name}" };
-            Log($"Begin handshake as {handshakeCommand.me}");
-			var reply = tcpClient.WriteAndGetReply(serializer.Serialize(handshakeCommand), TimeSpan.MaxValue);
-	        session.Status = GameStatus.Setup;
-			tcpClient.DataReceived += TcpClient_DataReceived;
-			var handshakeMessage = serializer.Deserialize<HandshakeMessage>(reply.MessageString);
-            if (handshakeMessage.you != handshakeCommand.me)
-                throw new Exception($"me: {handshakeCommand.me}, you: {handshakeMessage.you}");
+                var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)} {punter.GetType().Name}" };
+                Log($"Begin handshake as {handshakeCommand.me}");
+                var reply = tcpClient.WriteAndGetReply(serializer.Serialize(handshakeCommand), TimeSpan.MaxValue);
+                session.Status = GameStatus.Setup;
+                tcpClient.DataReceived += TcpClient_DataReceived;
+                var handshakeMessage = serializer.Deserialize<HandshakeMessage>(reply.MessageString);
+                if (handshakeMessage.you != handshakeCommand.me)
+                    throw new Exception($"me: {handshakeCommand.me}, you: {handshakeMessage.you}");
+            }
+            catch (Exception e)
+            {
+                Log(e.ToString());
+            }
         }
 
 	    private void TcpClient_DataReceived(object sender,
@@ -135,12 +141,6 @@ namespace Client
 	    {
 		    Console.Out.WriteLine(text);
 		    File.AppendAllLines($"client{Process.GetCurrentProcess().Id}Log.txt", new[] { text });
-	    }
-
-	    private static void ClearLogFiles()
-	    {
-		    foreach (var file in Directory.GetFiles(Environment.CurrentDirectory, "client*.txt"))
-			    File.Delete(file);
 	    }
     }
 }

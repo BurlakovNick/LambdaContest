@@ -20,7 +20,9 @@ namespace Referee
                 Directory.Delete("Results", true);
 	        if (File.Exists("refereeLog.txt"))
 		        File.Delete("refereeLog.txt");
-			args = args.Length == 0 ? new[] { "RandomPunter", "RandomPunter" } : args;
+            foreach (var file in Directory.GetFiles(Environment.CurrentDirectory, "client*.txt"))
+                File.Delete(file);
+            args = args.Length == 0 ? new[] { "RandomPunter", "RandomPunter" } : args;
             Run(args);
         }
 
