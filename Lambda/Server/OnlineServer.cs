@@ -141,11 +141,11 @@ namespace Server
             {
                 foreach (var connection in session.Clients)
                 {
-                    log($"Move {moveNumber}/{map.rivers.Length} by punter {connection.Name} with id {connection.Id}");
+                    Log($"Move {moveNumber}/{map.rivers.Length} by punter {connection.Name} with id {connection.Id}");
                     var reply = connection.Client.WriteAndGetReply(serializer.Serialize(lastMoves), TimeSpan.FromSeconds(1));
                     if (reply == null)
                     {
-                        log($"Punter {connection.Id} passed");
+                        Log($"Punter {connection.Id} passed");
 	                    File.AppendAllLines("errors.txt", new[] { $"timeout {moveNumber}/{map.rivers.Length}: {connection.Name}" });
 						lastMoves.move.moves.Add(new MoveCommand { pass = new Pass { punter = connection.Id } });
                     }
@@ -160,7 +160,7 @@ namespace Server
                         {
                             if (claimSet.Contains((moveCommand.claim.source, moveCommand.claim.target)))
                             {
-                                log($"Punter {connection.Id} claimed what has already been claimed " +
+                                Log($"Punter {connection.Id} claimed what has already been claimed " +
                                     $"({moveCommand.claim.source}, {moveCommand.claim.target})");
                             }
                             claimSet.Add((moveCommand.claim.source, moveCommand.claim.target));
