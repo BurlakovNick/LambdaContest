@@ -30,7 +30,7 @@ namespace Core.GreedyComponent
         {
             componentManager.UpdateMap(gameState.Map);
 
-            if (componentManager.IsConnected(desire))
+            if (!componentManager.IsConnected(desire))
             {
                 desire = componentManager.FindGreedyFullComponent(movesCount + 1);
             }
