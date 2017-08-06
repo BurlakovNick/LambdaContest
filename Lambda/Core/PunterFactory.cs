@@ -28,6 +28,8 @@ namespace Core
                     return new GreedyEdgeChooserPunterWithStupidZergRush(scorer, visitor);
                 case "BargeHauler":
                     return new BargeHauler(scorer, visitor);
+                case "BargeHauler2":
+                    return new BargeHauler2(scorer, visitor);
                 case "RandomPunter":
                     return new RandomPunter();
                 default:

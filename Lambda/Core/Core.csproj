@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="AlwaysFirstPunter.cs" />
     <Compile Include="BargeHauler.cs" />
+    <Compile Include="BargeHauler2.cs" />
     <Compile Include="Components\ComponentManager.cs" />
     <Compile Include="Components\ComponentScore.cs" />
     <Compile Include="Components\DesireComponent.cs" />
