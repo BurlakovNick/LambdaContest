@@ -8,5 +8,6 @@ start Server\bin\Debug\Server.exe oxford 2
 #start Client\bin\Debug\Client.exe GreedyEdgeChooserPunterWithZergRush
 #start Client\bin\Debug\Client.exe GreedyEdgeChooserPunterWithStupidZergRush
 #start Client\bin\Debug\Client.exe BargeHauler
-start Client\bin\Debug\Client.exe BargeHauler2
+#start Client\bin\Debug\Client.exe BargeHauler2
 start Client\bin\Debug\Client.exe BargeHauler3
+start Client\bin\Debug\Client.exe BargeHauler4
