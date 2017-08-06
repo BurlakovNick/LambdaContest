@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Core;
 using Core.Contracts;
@@ -15,37 +13,39 @@ namespace Client
     {
         private GameSession session;
         private readonly IPunter punter;
+        private readonly Action<string> log;
         private readonly Serializer serializer = new Serializer();
 
-        public OnlineClient(IPunter punter)
+        public OnlineClient(IPunter punter,
+                            ILog log)
         {
             this.punter = punter;
+            this.log = log.Log;
         }
 
         public void Start()
         {
-	        ClearLogFiles();
             session = new GameSession();
 
             var tcpClient = new SimpleTcpClient().Connect("localhost", 7777);
-            Log("tcp client connected to server");
+            log("tcp client connected to server");
+            tcpClient.DataReceived += TcpClient_DataReceived;
 
             var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)} {punter.GetType().Name}" };
-            Log($"Begin handshake as {handshakeCommand.me}");
-			var reply = tcpClient.WriteAndGetReply(serializer.Serialize(handshakeCommand), TimeSpan.MaxValue);
-	        session.Status = GameStatus.Setup;
-			tcpClient.DataReceived += TcpClient_DataReceived;
-			var handshakeMessage = serializer.Deserialize<HandshakeMessage>(reply.MessageString);
+            log($"Begin handshake as {handshakeCommand.me}");
+            var reply = tcpClient.WriteAndGetReply(serializer.Serialize(handshakeCommand), TimeSpan.MaxValue);
+            var handshakeMessage = serializer.Deserialize<HandshakeMessage>(reply.MessageString);
             if (handshakeMessage.you != handshakeCommand.me)
                 throw new Exception($"me: {handshakeCommand.me}, you: {handshakeMessage.you}");
+            session.Status = GameStatus.Setup;
         }
 
-	    private void TcpClient_DataReceived(object sender,
+        private void TcpClient_DataReceived(object sender,
                                             Message e)
         {
             try
             {
-                Log($"Handling message in TcpClient_DataReceived. Message: {e.MessageString}, Status: {session.Status}");
+                log($"Handling message in TcpClient_DataReceived. Message: {e.MessageString}");
                 switch (session.Status)
                 {
                     case GameStatus.Setup:
@@ -62,20 +62,20 @@ namespace Client
             }
             catch (Exception exception)
             {
-                Log("ERROR: " + exception);
+                log("ERROR: " + exception);
                 throw;
             }
         }
 
-	    private void HandleSetup(Message e)
+        private void HandleSetup(Message e)
         {
-            Log("HandleSetup");
+            log("HandleSetup");
             var setupMessage = serializer.Deserialize<SetupMessage>(e.MessageString);
             session.setupMessage = setupMessage;
             session.MyId = setupMessage.punter;
             session.Map = Converter.Convert(setupMessage.map);
 
-            Log($"##############################My Id is {session.MyId}");
+            log($"##############################My Id is {session.MyId}");
 
             punter.Init(session.Map, setupMessage.punters, new Punter { Id = setupMessage.punter });
 
@@ -87,9 +87,9 @@ namespace Client
             session.Status = GameStatus.Gameplay;
         }
 
-	    private void HandleGameplay(Message e)
+        private void HandleGameplay(Message e)
         {
-            Log("HandleGameplay");
+            log("HandleGameplay");
             var moveMessage = serializer.Deserialize<MoveMessage>(e.MessageString);
             if (moveMessage.IsStop)
             {
@@ -126,21 +126,9 @@ namespace Client
             }
         }
 
-	    private void ShowScores(MoveMessage.Score[] scores)
+        private void ShowScores(MoveMessage.Score[] scores)
         {
-            Log("scores: " + serializer.Serialize(scores));
+            log("scores: " + serializer.Serialize(scores));
         }
-
-	    private static void Log(string text)
-	    {
-		    Console.Out.WriteLine(text);
-		    File.AppendAllLines($"client{Process.GetCurrentProcess().Id}Log.txt", new[] { text });
-	    }
-
-	    private static void ClearLogFiles()
-	    {
-		    foreach (var file in Directory.GetFiles(Environment.CurrentDirectory, "client*.txt"))
-			    File.Delete(file);
-	    }
     }
 }

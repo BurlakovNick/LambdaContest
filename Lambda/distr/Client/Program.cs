@@ -10,7 +10,8 @@ namespace Client
             var punterName = args[0];
 
             var punter = PunterFactory.Create(punterName);
-            var client = new OnlineClient(punter);
+            var log = new ConsoleLog();
+            var client = new OnlineClient(punter, log);
             client.Start();
             Console.ReadLine();
         }
