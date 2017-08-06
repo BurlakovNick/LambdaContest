@@ -22,12 +22,12 @@ namespace Client
             this.punter = punter;
         }
 
-        public void Start()
+        public void Start(string server, string port)
         {
 	        ClearLogFiles();
             session = new GameSession();
 
-            var tcpClient = new SimpleTcpClient().Connect("localhost", 7777);
+            var tcpClient = new SimpleTcpClient().Connect(server, int.Parse(port));
             Log("tcp client connected to server");
 
             var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)} {punter.GetType().Name}" };
