@@ -42,7 +42,6 @@ namespace Core
             }
         }
 
-
         public void Init(Map map, int puntersCount, Punter punter)
         {
             state.movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
@@ -55,6 +54,11 @@ namespace Core
 
         public Edge Claim(GameState gameState)
         {
+            if (state.puntersCount == 2)
+            {
+                return new BargeHauler3(scorer, graphVisitor).Claim(gameState);
+            }
+
             componentManager.UpdateMap(gameState.Map);
             Edge edge;
 
