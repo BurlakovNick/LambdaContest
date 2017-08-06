@@ -67,6 +67,40 @@ namespace Core.Tests
             CheckComponents(component3, component4, actual, otherPunter.Id, false);
         }
 
+        [Test]
+        public void TestGetBridgesInAvailableEdges()
+        {
+            var nodes = Enumerable.Range(0, 12).Select(x => new Node {Id = x}).ToArray();
+            var map = new Map(nodes, new[]
+            {
+                new Edge {Source = nodes[0], Target = nodes[1]},
+                new Edge {Source = nodes[1], Target = nodes[2]},
+                new Edge {Source = nodes[1], Target = nodes[3]},
+                new Edge {Source = nodes[2], Target = nodes[3]},
+                new Edge {Source = nodes[3], Target = nodes[4]},
+                new Edge {Source = nodes[3], Target = nodes[5]},
+                new Edge {Source = nodes[5], Target = nodes[6]},
+                new Edge {Source = nodes[2], Target = nodes[7]},
+                new Edge {Source = nodes[0], Target = nodes[7]},
+                new Edge {Source = nodes[7], Target = nodes[8]},
+                new Edge {Source = nodes[8], Target = nodes[9]},
+                new Edge {Source = nodes[8], Target = nodes[11]},
+                new Edge {Source = nodes[9], Target = nodes[10]},
+                new Edge {Source = nodes[11], Target = nodes[10]},
+            });
+
+            var graphVisitor = new GraphVisitor();
+            var actual = graphVisitor.GetBridgesInAvailableEdges(map, myPunter);
+
+            actual.ShouldAllBeEquivalentTo(new Edge[]
+            {
+                new Edge {Source = nodes[3], Target =  nodes[4]},
+                new Edge {Source = nodes[3], Target =  nodes[5]},
+                new Edge {Source = nodes[5], Target =  nodes[6]},
+                new Edge {Source = nodes[7], Target =  nodes[8]},
+            });
+        }
+
         private static void CheckComponents(Node[] component1, Node[] component2, PunterConnectedComponents actual, int punterId, bool expected)
         {
             foreach (var left in component1)
