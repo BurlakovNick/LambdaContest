@@ -1,1 +1,1 @@
-start Server\bin\Debug\Server.exe oxford2-sparse-2 16
+start Server\bin\Debug\Server.exe randomSparse 2

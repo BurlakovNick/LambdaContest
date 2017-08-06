@@ -48,6 +48,8 @@ namespace Core
                     return new MineConnecterFullPunter(scorer);
                 case "FriendshipPunter":
                     return new FriendshipPunter(scorer);
+                case "MaxFriendshipPunter":
+                    return new MaxFriendshipPunter(scorer);
                 case "RandomPunter":
                     return new RandomPunter();
                 default:

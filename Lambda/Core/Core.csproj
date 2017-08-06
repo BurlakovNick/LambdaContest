@@ -95,6 +95,7 @@
     <Compile Include="Infrastructure\ConsoleLog.cs" />
     <Compile Include="IPunter.cs" />
     <Compile Include="IScorer.cs" />
+    <Compile Include="MaxFriendshipPunter.cs" />
     <Compile Include="MineConnecterFullPunter.cs" />
     <Compile Include="FriendshipPunter.cs" />
     <Compile Include="MaxConnecterPunter.cs" />
