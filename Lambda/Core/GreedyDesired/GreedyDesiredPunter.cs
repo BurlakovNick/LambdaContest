@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core.Components;
 using Core.GreedyComponent;
 using Core.Objects;
 
@@ -44,7 +45,7 @@ namespace Core.GreedyDesired
                     .Where(x => x.Component != first)
                     .ToArray();
             var claimedEdge = gameState.Map.Edges.First(e => e.Punter == null);
-            var maxScore = -1;
+            long maxScore = -1;
             foreach (var neighbour in neighbours.GroupBy(x => x.Component))
             {
                 var score = first.Mines.Union(neighbour.Key.Mines).Sum(x => neighbour.Key.Scores[x.Id] + desiredScores[x.Id]);
@@ -136,7 +137,7 @@ namespace Core.GreedyDesired
             var nodeToComponent = BuildNodeToComponent();
 
             desiredComponent = new HashSet<Component> { first };
-            var S = new SortedSet<(int, Component)>();
+            var S = new SortedSet<(long, Component)>();
             foreach (var c in first.Nodes.SelectMany(n => map.GetAvaliableEdges(n.Id, punter).Select(e => nodeToComponent[e.Item1.Id])).Distinct())
             {
                 S.Add((first.Mines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]), c));
