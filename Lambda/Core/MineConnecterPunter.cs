@@ -79,7 +79,8 @@ namespace Core
             {
                 return null;
             }
-            var result = componentManager.FindShortestPath(a, b);
+            long temp;
+            var result = componentManager.FindShortestPath(a, b, out temp);
             result.Root = a.Score.SelfScore > b.Score.SelfScore ? a : b;
             return result;
         }

@@ -64,7 +64,7 @@ namespace Core.Components
             return distance.ContainsKey(b) ? distance[b] : int.MaxValue;
         }
 
-        public DesireComponent FindShortestPath(Component a, Component b)
+        public DesireComponent FindShortestPath(Component a, Component b, out long resultScore)
         {
             var distanceFromA = Bfs(a, b);
             var distanceFromB = Bfs(b, a);
@@ -97,6 +97,8 @@ namespace Core.Components
                     }
                 }
             }
+
+            resultScore = dp[b].SelfScore;
 
             var result = new DesireComponent();
             result.Components.Add(a);
