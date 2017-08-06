@@ -43,7 +43,7 @@ namespace Core
                 .Edges
                 .Where(x => x.Source.IsMine || x.Target.IsMine)
                 .Where(x => x.Punter == null)
-                .OrderByDescending(x => GetWeight(gameState, x, punter, connectedComponents))
+                .OrderByDescending(x => GetWeight(x, punter, connectedComponents))
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .FirstOrDefault();
 
@@ -59,7 +59,7 @@ namespace Core
                             reachableNodeIds.Contains(x.Target.Id) ||
                             x.Source.IsMine ||
                             x.Target.IsMine)
-                .OrderByDescending(x => GetWeight(gameState, x, punter, connectedComponents))
+                .OrderByDescending(x => GetWeight(x, punter, connectedComponents))
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .FirstOrDefault();
 
@@ -101,7 +101,7 @@ namespace Core
                    map.GetPunterEdges(to, punter).Count > 0;
         }
 
-        private int GetWeight(GameState gameState, Edge claimEdge, Punter punter, PunterConnectedComponents punterConnectedComponents)
+        private int GetWeight(Edge claimEdge, Punter punter, PunterConnectedComponents punterConnectedComponents)
         {
             if (punterConnectedComponents.IsInSameComponent(claimEdge.Source.Id, claimEdge.Target.Id, punter.Id))
             {
@@ -109,9 +109,14 @@ namespace Core
             }
 
             claimEdge.Punter = punter;
-            var newScore = scorer.Score(gameState);
+
+            var leftComponent = punterConnectedComponents.GetComponent(punter.Id, claimEdge.Source.Id);
+            var rightComponent = punterConnectedComponents.GetComponent(punter.Id, claimEdge.Target.Id);
+
+            var scoreDelta = scorer.ScoreForUnitingComponents(leftComponent, rightComponent);
+
             claimEdge.Punter = null;
-            return newScore;
+            return scoreDelta;
         }
 
         private HashSet<int> GetReachableNodesFromMines(Map map, Punter punter)
