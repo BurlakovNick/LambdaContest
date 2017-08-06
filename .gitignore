@@ -259,9 +259,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-Lambda/move_commands.txt
-Lambda/moves.txt
-Lambda/scores.txt
-Lambda/map_command.txt
-Lambda/who.txt
-Lambda/players_count.txt
+Lambda/*.txt
