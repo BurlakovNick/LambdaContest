@@ -48,6 +48,18 @@ namespace Core.Tests
             redScore.Should().Be(12);
         }
 
+        [Test]
+        public void TestScoreForUnitingComponents()
+        {
+            var scorer = new Scorer(new DistanceCalculator(), new GraphVisitor());
+            var map = GetMapFromSampleA();
+
+            scorer.Init(map);
+
+            var actual = scorer.ScoreForUnitingComponents(new[] {0, 1}, new[] {7, 6, 5});
+            actual.Should().Be(17);
+        }
+
         private Map GetMapFromSampleA()
         {
             return new Map(

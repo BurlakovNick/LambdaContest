@@ -118,47 +118,58 @@ namespace Server
 		{
 			Log("Letsplay =)");
 
-			var moveNumber = 1;
-			var lastMoves = new MoveMessage
-							{
-								move = new MoveMessage.InternalMove
-									   {
-										   moves = session.Clients
-														  .Select(x => new MoveCommand
-																	   {
-																		   pass = new Pass
-																				  {
-																					  punter = x.Id
-																				  }
-																	   })
-														  .ToList()
-									   }
-							};
-			var moves = new List<MoveCommand>(lastMoves.move.moves);
+            var moveNumber = 1;
+            var lastMoves = new MoveMessage
+                            {
+                                move = new MoveMessage.InternalMove
+                                       {
+                                           moves = session.Clients
+                                                          .Select(x => new MoveCommand
+                                                                       {
+                                                                           pass = new Pass
+                                                                                  {
+                                                                                      punter = x.Id
+                                                                                  }
+                                                                       })
+                                                          .ToList()
+                                       }
+                            };
+            var moves = new List<MoveCommand>(lastMoves.move.moves);
+            var claimSet = new HashSet<(int, int)>();
 
-			while (moveNumber != map.rivers.Length)
-			{
-				foreach (var connection in session.Clients)
-				{
-					Log($"Move {moveNumber}/{map.rivers.Length} by punter {connection.Name} with id {connection.Id}");
-					var reply = connection.Client.WriteAndGetReply(serializer.Serialize(lastMoves), TimeSpan.FromSeconds(1));
-					if (reply == null)
-					{
-						Log($"Punter {connection.Id} passed");
-						File.AppendAllLines("errors.txt", new[] { $"timeout {moveNumber}/{map.rivers.Length}: {connection.Name}" });
+            while (moveNumber != map.rivers.Length)
+            {
+                foreach (var connection in session.Clients)
+                {
+                    log($"Move {moveNumber}/{map.rivers.Length} by punter {connection.Name} with id {connection.Id}");
+                    var reply = connection.Client.WriteAndGetReply(serializer.Serialize(lastMoves), TimeSpan.FromSeconds(1));
+                    if (reply == null)
+                    {
+                        log($"Punter {connection.Id} passed");
+	                    File.AppendAllLines("errors.txt", new[] { $"timeout {moveNumber}/{map.rivers.Length}: {connection.Name}" });
 						lastMoves.move.moves.Add(new MoveCommand { pass = new Pass { punter = connection.Id } });
-					}
-					else
-					{
-						var moveCommand = serializer.Deserialize<MoveCommand>(reply.MessageString);
-						LogClaimToFile(moveNumber, moveCommand);
-						lastMoves.move.moves.RemoveAt(0);
-						lastMoves.move.moves.Add(moveCommand);
-						moves.Add(moveCommand);
-					}
-					if (moveNumber == map.rivers.Length)
-						break;
-					moveNumber++;
+                    }
+                    else
+                    {
+                        var moveCommand = serializer.Deserialize<MoveCommand>(reply.MessageString);
+                        LogClaimToFile(moveNumber, moveCommand);
+                        lastMoves.move.moves.RemoveAt(0);
+                        lastMoves.move.moves.Add(moveCommand);
+                        moves.Add(moveCommand);
+                        if (moveCommand.claim != null)
+                        {
+                            if (claimSet.Contains((moveCommand.claim.source, moveCommand.claim.target)))
+                            {
+                                log($"Punter {connection.Id} claimed what has already been claimed " +
+                                    $"({moveCommand.claim.source}, {moveCommand.claim.target})");
+                            }
+                            claimSet.Add((moveCommand.claim.source, moveCommand.claim.target));
+                            claimSet.Add((moveCommand.claim.target, moveCommand.claim.source));
+                        }
+                    }
+                    if (moveNumber == map.rivers.Length)
+                        break;
+                    moveNumber++;
 
 					if (moveNumber % 100 == 0)
 						LogScores(map, moves);

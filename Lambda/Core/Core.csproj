@@ -55,6 +55,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlwaysFirstPunter.cs" />
+    <Compile Include="BargeHauler.cs" />
+    <Compile Include="Components\ComponentManager.cs" />
+    <Compile Include="Components\DesireComponent.cs" />
+    <Compile Include="Components\IComponentManager.cs" />
     <Compile Include="Contracts\Claim.cs" />
     <Compile Include="Contracts\Converters\Converter.cs" />
     <Compile Include="Contracts\GameStateMessage.cs" />
@@ -70,7 +74,7 @@
     <Compile Include="Contracts\SiteContract.cs" />
     <Compile Include="DistanceCalculator.cs" />
     <Compile Include="GraphVisitor.cs" />
-    <Compile Include="GreedyComponent\Component.cs" />
+    <Compile Include="Components\Component.cs" />
     <Compile Include="GreedyComponent\GreedyComponentPunter.cs" />
     <Compile Include="GreedyEdgeChooserPunter.cs" />
     <Compile Include="GreedyDesired\GreedyDesiredPunter.cs" />

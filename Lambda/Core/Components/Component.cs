@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Objects;
 
-namespace Core.GreedyComponent
+namespace Core.Components
 {
     public class Component : IComparable
     {
         public List<Node> Nodes { get; set; }
         public List<Node> Mines { get; set; }
-        public Dictionary<int, int> Scores { get; set; } = new Dictionary<int, int>();
+        public Dictionary<int, long> Scores { get; set; } = new Dictionary<int, long>();
+        public long SelfScore { get; set; }
         public int SubtreeSize { get; set; }
 
         public Component(Node node, Node[] mines, IScorer scorer)
@@ -21,6 +22,7 @@ namespace Core.GreedyComponent
                 var d = scorer.GetDistance(mine, node);
                 Scores.Add(mine.Id, d * d);
             }
+            SelfScore = Mines.Sum(x => Scores[x.Id]);
         }
 
         public void Union(Component other)
@@ -31,6 +33,7 @@ namespace Core.GreedyComponent
             {
                 Scores[score.Key] += score.Value;
             }
+            SelfScore = Mines.Sum(x => Scores[x.Id]);
         }
 
         public int CompareTo(object obj)

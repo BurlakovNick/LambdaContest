@@ -1,4 +1,3 @@
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Objects;
@@ -27,6 +26,37 @@ namespace Core
         {
             get => state;
             set => state = value;
+        }
+
+        public int ScoreForUnitingComponents(int[] leftComponent, int[] rightComponent)
+        {
+            var score = 0;
+
+            foreach (var left in leftComponent)
+            {
+                if (state.DistancesFromMines.ContainsKey(left))
+                {
+                    foreach (var right in rightComponent)
+                    {
+                        var distance = GetDistance(left, right);
+                        score += distance * distance;
+                    }
+                }
+            }
+
+            foreach (var right in rightComponent)
+            {
+                if (state.DistancesFromMines.ContainsKey(right))
+                {
+                    foreach (var left in leftComponent)
+                    {
+                        var distance = GetDistance(right, left);
+                        score += distance * distance;
+                    }
+                }
+            }
+
+            return score;
         }
 
         public void Init(Map map)
@@ -66,7 +96,12 @@ namespace Core
 
         public int GetDistance(Node from, Node to)
         {
-            if (state.DistancesFromMines[from.Id].TryGetValue(to.Id, out var dist))
+            return GetDistance(from.Id, to.Id);
+        }
+
+        private int GetDistance(int from, int to)
+        {
+            if (state.DistancesFromMines[from].TryGetValue(to, out var dist))
             {
                 return dist;
             }

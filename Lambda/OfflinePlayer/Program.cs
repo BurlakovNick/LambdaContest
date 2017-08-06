@@ -11,7 +11,7 @@ namespace OfflinePlayer
         {
             var scorer = new Scorer(new DistanceCalculator(), new GraphVisitor());
             var graphVisitor = new GraphVisitor();
-            var punter = new GreedyEdgeChooserPunter(scorer, graphVisitor);
+            var punter = new GreedyEdgeChooserPunterWithZergRush(scorer, graphVisitor);
             var offlinePlayer = new OfflinePlayer(punter, scorer);
 
             offlinePlayer.Play();

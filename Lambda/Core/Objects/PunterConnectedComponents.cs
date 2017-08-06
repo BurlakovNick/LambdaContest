@@ -6,12 +6,14 @@ namespace Core.Objects
 {
     public class PunterConnectedComponents
     {
+        private readonly List<int[]> components;
         private readonly Dictionary<int, Dictionary<int, int>> componentId;
         private int componentsCount;
 
         public PunterConnectedComponents()
         {
             componentId = new Dictionary<int, Dictionary<int, int>>();
+            components = new List<int[]>();
             componentsCount = 0;
         }
 
@@ -24,6 +26,7 @@ namespace Core.Objects
                 componentId[punterId] = new Dictionary<int, int>();
             }
 
+            components.Add(nodeIds);
             foreach (var nodeId in nodeIds)
             {
                 if (componentId[punterId].ContainsKey(nodeId))
@@ -48,6 +51,17 @@ namespace Core.Objects
             }
 
             return left == right;
+        }
+
+        public int[] GetComponent(int punterId, int nodeId)
+        {
+            var id = SafeGetComponent(punterId, nodeId);
+            if (id == -1)
+            {
+                return new[] {nodeId};
+            }
+
+            return components[id];
         }
 
         private int SafeGetComponent(int punterId, int nodeId)
