@@ -44,7 +44,8 @@ namespace Core
                 .Edges
                 .Where(x => x.Source.IsMine || x.Target.IsMine)
                 .Where(x => x.Punter == null)
-                .OrderByDescending(x => GetWeight(x, punter, strictComponents))
+                .OrderByDescending(x => CapturedMinesCount(gameState, x))
+                .ThenByDescending(x => GetWeight(x, punter, strictComponents))
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .FirstOrDefault();
 
@@ -124,6 +125,18 @@ namespace Core
         {
             var reachableNodes = graphVisitor.GetReachableNodesFromMinesForPunter(map, punter);
             return new HashSet<int>(reachableNodes.Select(x => x.Id));
+        }
+
+        private int CapturedMinesCount(GameState gameState, Edge claimEdge)
+        {
+            return (IsNotCapturedMine(gameState, claimEdge.Source) ? 1 : 0) +
+                   (IsNotCapturedMine(gameState, claimEdge.Target) ? 1 : 0);
+        }
+
+        private bool IsNotCapturedMine(GameState gameState, Node node)
+        {
+            return node.IsMine &&
+                   gameState.Map.GetPunterEdges(node.Id, gameState.CurrentPunter).Count == 0;
         }
 
         private int CountFreeNeighborEdges(GameState gameState, Edge claimEdge)

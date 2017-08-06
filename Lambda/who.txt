@@ -1,1 +1,1 @@
-[{"Id":0,"Name":"player524 GreedyDesiredPunter 0"},{"Id":1,"Name":"player166 BargeHauler 1"}]
+[{"Id":0,"Name":"player987 BargeHauler 0"},{"Id":1,"Name":"player987 GreedyEdgeChooserPunterWithStupidZergRush 1"}]
