@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Core.Objects;
 using FluentAssertions;
 using NUnit.Framework;
@@ -48,12 +49,18 @@ namespace Core.Tests
             var component1 = new[] {node0, node1, node2, node3};
             var component2 = new[] { node4, node5, node6, node7 };
 
+            actual.GetComponent(myPunter.Id, node0.Id).ShouldAllBeEquivalentTo(component1.Select(x => x.Id));
+            actual.GetComponent(myPunter.Id, node4.Id).ShouldAllBeEquivalentTo(component2.Select(x => x.Id));
+
             CheckComponents(component1, component1, actual, myPunter.Id, true);
             CheckComponents(component2, component2, actual, myPunter.Id, true);
             CheckComponents(component1, component2, actual, myPunter.Id, false);
 
             var component3 = new[] { node0, node1, node2, node7 };
             var component4 = new[] { node3, node4, node5, node6 };
+
+            actual.GetComponent(otherPunter.Id, node0.Id).ShouldAllBeEquivalentTo(component3.Select(x => x.Id));
+            actual.GetComponent(otherPunter.Id, node3.Id).ShouldAllBeEquivalentTo(component4.Select(x => x.Id));
 
             CheckComponents(component3, component3, actual, otherPunter.Id, true);
             CheckComponents(component4, component4, actual, otherPunter.Id, true);

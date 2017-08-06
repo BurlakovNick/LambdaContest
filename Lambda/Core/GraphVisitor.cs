@@ -9,6 +9,16 @@ namespace Core
     {
         public PunterConnectedComponents GetConnectedComponents(Map map)
         {
+            return GetConnectedComponents(map, false);
+        }
+
+        public PunterConnectedComponents GetConnectedByAvailableEdgesComponents(Map map)
+        {
+            return GetConnectedComponents(map, true);
+        }
+
+        private static PunterConnectedComponents GetConnectedComponents(Map map, bool withFreeEdges)
+        {
             var connectedComponents = new PunterConnectedComponents();
 
             var punters = map
@@ -34,7 +44,7 @@ namespace Core
 
                     var component = new List<Node>();
                     component.Add(AddNode(queue, visitedNodeIds, node));
-                    Bfs(map, punter, queue, visitedNodeIds, component);
+                    Bfs(map, punter, queue, visitedNodeIds, component, withFreeEdges);
 
                     var nodeIds = component.Select(x => x.Id).ToArray();
                     connectedComponents.AddComponent(nodeIds, punter.Id);
@@ -71,7 +81,7 @@ namespace Core
             return result.ToArray();
         }
 
-        private static void Bfs(Map map, Punter punter, Queue<Node> queue, HashSet<int> visitedNodeIds, List<Node> result)
+        private static void Bfs(Map map, Punter punter, Queue<Node> queue, HashSet<int> visitedNodeIds, List<Node> result, bool withFreeEdges = false)
         {
             while (queue.Count > 0)
             {
@@ -79,9 +89,13 @@ namespace Core
 
                 foreach ((var to, var edge) in map.GetEdges(node.Id))
                 {
-                    if (edge.Punter != null &&
-                        edge.Punter.Id == punter.Id &&
-                        !visitedNodeIds.Contains(to.Id))
+                    if (visitedNodeIds.Contains(to.Id))
+                    {
+                        continue;
+                    }
+
+                    if (withFreeEdges && edge.Punter == null ||
+                        edge.Punter != null && edge.Punter.Id == punter.Id)
                     {
                         result.Add(AddNode(queue, visitedNodeIds, to));
                     }

@@ -10,21 +10,24 @@ namespace Core
         {
             var visitor = new GraphVisitor();
             var distanceCalculator = new DistanceCalculator();
+            var scorer = new Scorer(distanceCalculator, visitor);
 
             switch (name)
             {
                 case "GreedyComponentPunter":
-                    return new GreedyComponentPunter(new Scorer(distanceCalculator, visitor));
+                    return new GreedyComponentPunter(scorer);
                 case "GreedyDesiredPunter":
-                    return new GreedyDesiredPunter(new Scorer(distanceCalculator, visitor));
+                    return new GreedyDesiredPunter(scorer);
                 case "AlwaysFirstPunter":
                     return new AlwaysFirstPunter();
                 case "GreedyEdgeChooserPunter":
-                    return new GreedyEdgeChooserPunter(new Scorer(distanceCalculator, visitor), visitor);
+                    return new GreedyEdgeChooserPunter(scorer, visitor);
                 case "GreedyEdgeChooserPunterWithZergRush":
-                    return new GreedyEdgeChooserPunterWithZergRush(new Scorer(distanceCalculator, visitor), visitor);
+                    return new GreedyEdgeChooserPunterWithZergRush(scorer, visitor);
                 case "GreedyEdgeChooserPunterWithStupidZergRush":
-                    return new GreedyEdgeChooserPunterWithStupidZergRush(new Scorer(distanceCalculator, visitor), visitor);
+                    return new GreedyEdgeChooserPunterWithStupidZergRush(scorer, visitor);
+                case "BargeHauler":
+                    return new BargeHauler(scorer, visitor);
                 case "RandomPunter":
                     return new RandomPunter();
                 default:

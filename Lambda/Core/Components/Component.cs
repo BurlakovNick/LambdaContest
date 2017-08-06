@@ -17,12 +17,12 @@ namespace Core.Components
         {
             Nodes = new List<Node> {node};
             Mines = Nodes.Where(x => x.IsMine).ToList();
-            SelfScore = Mines.Sum(x => Scores[x.Id]);
             foreach (var mine in mines)
             {
                 var d = scorer.GetDistance(mine, node);
                 Scores.Add(mine.Id, d * d);
             }
+            SelfScore = Mines.Sum(x => Scores[x.Id]);
         }
 
         public void Union(Component other)
