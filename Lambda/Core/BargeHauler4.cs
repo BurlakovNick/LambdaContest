@@ -43,6 +43,10 @@ namespace Core
                     x => scorer.Score(new GameState {Map = map, CurrentPunter = new Punter {Id = x}}));
 
             var reachableNodeIds = GetReachableNodesFromMines(map, punter);
+            var bridgeEdges = graphVisitor
+                .GetBridgesInAvailableEdges(map, punter)
+                .Where(x => x.Punter == null)
+                .ToArray();
 
             if (moveCount < 3 * mineCount)
             {
@@ -68,27 +72,7 @@ namespace Core
                 }
             }
 
-            var bridgeEdges = graphVisitor
-                .GetBridgesInAvailableEdges(map, punter)
-                .Where(x => x.Punter == null)
-                .ToArray();
-
-            var goodBridges = bridgeEdges
-                .Select(x => new {edge = x, weight = GetWeightForBridge(map, x, punter, reachableNodeIds)})
-                .Where(x => x.weight > 0)
-                .ToArray();
-
-            bridgeMaxScore = goodBridges.Length > 0 ? goodBridges.Max(x => x.weight) : 1;
-            maxScore = goodBridges.Length > 0 ? goodBridges.Max(x => GetWeight(x.edge, punter, strictComponents)) : 1;
-
-            var bestBridge = goodBridges
-                .Select(x => x.edge)
-                .OrderByDescending(x => GetWeightForBridge(map, x, punter, reachableNodeIds))
-                .ThenByDescending(x => GetWeight(x, punter, strictComponents))
-                .ThenBy(x => GetShortestDistanceToMineInOtherComponent(x, strictComponents, punter))
-                .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
-                .FirstOrDefault();
-
+            var bestBridge = GetBridge(gameState, map, punter, reachableNodeIds, strictComponents, bridgeEdges);
             if (bestBridge != null)
             {
                 return bestBridge;
@@ -165,6 +149,28 @@ namespace Core
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .ThenBy(x => Guid.NewGuid())
                 .FirstOrDefault(x => x.Punter == null);
+        }
+
+        private Edge GetBridge(GameState gameState, Map map, Punter punter, HashSet<int> reachableNodeIds, 
+            PunterConnectedComponents strictComponents, Edge[] bridgeEdges)
+        {
+            var goodBridges = bridgeEdges
+                .Select(x => new {edge = x, weight = GetWeightForBridge(map, x, punter, reachableNodeIds)})
+                .Where(x => x.weight > 0)
+                .ToArray();
+
+            bridgeMaxScore = goodBridges.Length > 0 ? goodBridges.Max(x => x.weight) : 1;
+            maxScore = goodBridges.Length > 0 ? goodBridges.Max(x => GetWeight(x.edge, punter, strictComponents)) : 1;
+
+            var bestBridge = goodBridges
+                .Select(x => x.edge)
+                .OrderByDescending(x => GetWeightForBridge(map, x, punter, reachableNodeIds))
+                .ThenByDescending(x => GetWeight(x, punter, strictComponents))
+                .ThenBy(x => GetShortestDistanceToMineInOtherComponent(x, strictComponents, punter))
+                .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
+                .FirstOrDefault();
+
+            return bestBridge;
         }
 
         private static bool HasNeighborPunterEdge(Map map, Edge edge, Punter punter)
