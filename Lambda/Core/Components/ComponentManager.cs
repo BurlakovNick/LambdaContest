@@ -85,7 +85,7 @@ namespace Core.Components
             {
                 var prevs = GetEdges(node)
                     .Select(x => x.Item1)
-                    .Where(x => dp.ContainsKey(x) && distanceFromA[x] == distanceFromA[node] + 1);
+                    .Where(x => dp.ContainsKey(x) && distanceFromA[x] == distanceFromA[node] - 1);
 
                 foreach (var prev in prevs)
                 {
@@ -169,6 +169,11 @@ namespace Core.Components
         {
             var visited = Bfs(component.Components.First(), null, component);
             return visited.Count == component.Components.Count;
+        }
+
+        public Component[] GetMineComponents()
+        {
+            return components.Where(x => x.Score.Mines.Any()).ToArray();
         }
 
         private Dictionary<Component, int> Bfs(Component a, Component b, DesireComponent avaliableComponents = null)

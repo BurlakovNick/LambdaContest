@@ -14,6 +14,7 @@ namespace Core.Components
 
         Component GetBestComponentByChart(int chartSize);
         bool IsConnected(DesireComponent component);
+        Component[] GetMineComponents();
 
         Edge GetMineEdge();
         Edge GetMostExpensiveEdge();

@@ -3,7 +3,7 @@ using Core.Objects;
 
 namespace Core.GreedyComponent
 {
-    public partial class GreedyComponentPunter : IPunter
+    public class GreedyComponentPunter : IPunter
     {
         private readonly IScorer scorer;
         private DesireComponent desire;
