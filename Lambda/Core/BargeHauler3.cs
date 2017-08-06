@@ -69,7 +69,7 @@ namespace Core
                 .ToArray();
 
             var goodBridges = bridgeEdges
-                .Select(x => new { edge = x, weight = GetWeightForBridge(map, x, punter, reachableNodeIds)})
+                .Select(x => new {edge = x, weight = GetWeightForBridge(map, x, punter, reachableNodeIds)})
                 .Where(x => x.weight > 0)
                 .ToArray();
 
@@ -120,12 +120,15 @@ namespace Core
 
             if (bestPunter.Id != punter.Id)
             {
-                var enemyBridges = graphVisitor.GetBridgesInAvailableEdges(map, bestPunter).Where(x => x.Punter == null).ToArray();
+                var enemyBridges = graphVisitor.GetBridgesInAvailableEdges(map, bestPunter)
+                    .Where(x => x.Punter == null)
+                    .ToArray();
 
                 if (enemyBridges.Any())
                 {
                     return enemyBridges
-                        .OrderByDescending(x => !strictComponents.IsInSameComponent(x.Source.Id, x.Target.Id, punter.Id))
+                        .OrderByDescending(
+                            x => !strictComponents.IsInSameComponent(x.Source.Id, x.Target.Id, punter.Id))
                         .ThenByDescending(x => HasNeighborPunterEdge(map, x, bestPunter))
                         .ThenBy(x => Guid.NewGuid())
                         .FirstOrDefault(x => x.Punter == null);
@@ -192,8 +195,12 @@ namespace Core
         {
             claimEdge.Punter = new Punter {Id = -1};
 
-            var leftComponent = graphVisitor.GetReachableNodesForPunter(claimEdge.Source, map, punter, true).Where(x => reachableNodeIds.Contains(x.Id)).ToArray();
-            var rightComponent = graphVisitor.GetReachableNodesForPunter(claimEdge.Target, map, punter, true).Where(x => reachableNodeIds.Contains(x.Id)).ToArray();
+            var leftComponent = graphVisitor.GetReachableNodesForPunter(claimEdge.Source, map, punter, true)
+                .Where(x => reachableNodeIds.Contains(x.Id))
+                .ToArray();
+            var rightComponent = graphVisitor.GetReachableNodesForPunter(claimEdge.Target, map, punter, true)
+                .Where(x => reachableNodeIds.Contains(x.Id))
+                .ToArray();
 
             claimEdge.Punter = null;
 
@@ -208,7 +215,8 @@ namespace Core
             }
 
             var scalingFactor = Math.Max(10, bridgeMaxScore / 10);
-            var scoreDelta = ((left - leftMines) * rightMines + (right - rightMines) * leftMines - 1 + scalingFactor) / scalingFactor;
+            var scoreDelta = ((left - leftMines) * rightMines + (right - rightMines) * leftMines - 1 + scalingFactor) /
+                             scalingFactor;
 
             return scoreDelta;
         }
