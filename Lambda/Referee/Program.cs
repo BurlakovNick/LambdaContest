@@ -25,7 +25,7 @@ namespace Referee
             Log("#################################################");
             Log(string.Join(" VS ", punters));
             Log("#################################################");
-	        var maps = GetAllMaps().Where(x => x == "sample").ToArray();
+	        var maps = GetAllMaps();
             var i = 1;
             foreach (var map in maps)
             {

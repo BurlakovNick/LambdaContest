@@ -19,8 +19,8 @@ namespace Distributor
 			if (Directory.Exists("Results"))
 				Directory.Delete("Results", true);
 
-			deploySemaphore = new SemaphoreSlim(1, 1);
-			var agents = GetAllAgents().Where(x => x.Contains("elba-1")).ToArray();
+			deploySemaphore = new SemaphoreSlim(72, 72);
+			var agents = GetAllAgents();
 			Log($"{agents.Length} agents");
 
 			var allPunters = GetAllPunters();
