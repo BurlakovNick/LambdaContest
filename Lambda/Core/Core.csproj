@@ -94,6 +94,7 @@
     <Compile Include="Infrastructure\ConsoleLog.cs" />
     <Compile Include="IPunter.cs" />
     <Compile Include="IScorer.cs" />
+    <Compile Include="MineConnecterFullPunter.cs" />
     <Compile Include="MineConnecterPunter.cs" />
     <Compile Include="Objects\PunterConnectedComponents.cs" />
     <Compile Include="Objects\Edge.cs" />

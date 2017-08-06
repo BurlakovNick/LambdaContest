@@ -194,7 +194,7 @@ namespace Server
 			Log("SCORING!");
 
 			var scores = LogScores(map, moves);
-			var serializedScores = JsonConvert.SerializeObject(scores.Select(x => new { Punter = x.Item1.Id, Score = x.Item2 }));
+			var serializedScores = JsonConvert.SerializeObject(scores.OrderByDescending(x => x.Item2).Select(x => new { Punter = x.Item1.Id, Score = x.Item2 }));
 			File.WriteAllText("scores.txt", serializedScores);
 
 			foreach (var connection in session.Clients)

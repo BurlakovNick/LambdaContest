@@ -4,7 +4,7 @@ using Core.Objects;
 
 namespace Core
 {
-    public class MineConnecterPunter : IPunter
+    public class MineConnecterFullPunter : IPunter
     {
         private readonly IScorer scorer;
         private PunterState state;
@@ -12,8 +12,9 @@ namespace Core
         private int lambdasCount;
         private IComponentManager componentManager;
         private DesireComponent desire;
+        private DesireComponent fullDesire;
 
-        public MineConnecterPunter(IScorer scorer)
+        public MineConnecterFullPunter(IScorer scorer)
         {
             this.scorer = scorer;
             componentManager = new ComponentManager(scorer);
@@ -28,6 +29,7 @@ namespace Core
             var mineCount = componentManager.GetMineComponents().Length;
             lambdasCount = Math.Max(Math.Min(movesCount / 20, 2 * mineCount), mineCount);
             desire = new DesireComponent();
+            fullDesire = null;
         }
 
         public Edge Claim(GameState gameState)
@@ -46,12 +48,22 @@ namespace Core
                 {
                     desire = GetDesire();
                 }
-                edge = desire == null
-                    ? componentManager.GetMostExpensiveEdge()
-                    : componentManager.GetFragileEdge(desire);
+                if (desire == null)
+                {
+                    if (fullDesire == null || fullDesire.Components.Count <= 1 || !componentManager.IsConnected(fullDesire))
+                    {
+                        fullDesire = componentManager.FindGreedyFullComponent(10);
+                    }
+
+                    edge = componentManager.GetFragileEdge(fullDesire);
+                }
+                else
+                {
+                    edge = componentManager.GetFragileEdge(desire);
+                }
             }
 
-            componentManager.ClaimEdge(edge.Source, edge.Target, desire);
+            componentManager.ClaimEdge(edge.Source, edge.Target, desire ?? fullDesire);
             movesCount--;
             return edge;
         }
