@@ -8,31 +8,43 @@ namespace Core.Components
     public class ComponentManager : IComponentManager
     {
         private readonly IScorer scorer;
-        private Node[] mines;
-        private Map map;
-        private Punter punter;
-        private List<Component> components;
-        private Dictionary<int, Component> nodeToComponent;
+        private ComponentManagerState state;
+        public Dictionary<int, Component> nodeToComponent { get; set; }
 
         public ComponentManager(IScorer scorer)
         {
             this.scorer = scorer;
+            state = new ComponentManagerState
+            {
+            };
+        }
+
+        public ComponentManagerState State
+        {
+            get { return state; }
+            set
+            {
+                state = value;
+                nodeToComponent = state.components
+                    .SelectMany(c => c.Nodes.Select(n => new { Key = n, Value = c }))
+                    .ToDictionary(x => x.Key.Id, x => x.Value);
+            }
         }
 
         public void InitComponents(Map map, Punter punter)
         {
-            this.map = map;
-            this.punter = punter;
-            mines = map.Nodes.Where(n => n.IsMine).ToArray();
-            components = map.Nodes.Select(n => new Component(n, mines, scorer)).ToList();
-            nodeToComponent = components
+            this.state.map = map;
+            this.state.punter = punter;
+            state.mines = map.Nodes.Where(n => n.IsMine).ToArray();
+            state.components = map.Nodes.Select(n => new Component(n, state.mines, scorer)).ToList();
+            nodeToComponent = state.components
                 .SelectMany(c => c.Nodes.Select(n => new { Key = n, Value = c }))
                 .ToDictionary(x => x.Key.Id, x => x.Value);
         }
 
         public void UpdateMap(Map map)
         {
-            this.map = map;
+            this.state.map = map;
         }
 
         public void ClaimEdge(Node a, Node b, DesireComponent desire = null)
@@ -42,7 +54,7 @@ namespace Core.Components
             if (sourceComponent != targetComponent)
             {
                 sourceComponent.Union(targetComponent);
-                components.Remove(targetComponent);
+                state.components.Remove(targetComponent);
                 foreach (var node in targetComponent.Nodes)
                 {
                     nodeToComponent[node.Id] = sourceComponent;
@@ -142,14 +154,14 @@ namespace Core.Components
 
                 if (newComponent.Score.Mines.Any())
                 {
-                    foreach (var c in components.Where(c => !result.Components.Contains(c)))
+                    foreach (var c in state.components.Where(c => !result.Components.Contains(c)))
                     {
                         S.Add((desireScore.Clone().Add(c.Score).SelfScore - desireScore.SelfScore, c));
                     }
                 }
                 else
                 {
-                    foreach (var c in newComponent.Nodes.SelectMany(n => map.GetAvaliableEdges(n.Id, punter).Select(e => nodeToComponent[e.Item1.Id])).Distinct().Where(x => !result.Components.Contains(x)))
+                    foreach (var c in newComponent.Nodes.SelectMany(n => state.map.GetAvaliableEdges(n.Id, state.punter).Select(e => nodeToComponent[e.Item1.Id])).Distinct().Where(x => !result.Components.Contains(x)))
                     {
                         S.Add((desireScore.Clone().Add(c.Score).SelfScore - desireScore.SelfScore, c));
                     }
@@ -161,8 +173,8 @@ namespace Core.Components
 
         public Component GetBestComponentByChart(int chartSize)
         {
-            var mineToScore = mines.ToDictionary(m => m.Id, m => components.Select(n => n.Score.Scores[m.Id]).OrderByDescending(s => s).Take(chartSize).Sum());
-            return components.OrderByDescending(n => n.Score.Mines.Sum(x => mineToScore[x.Id])).First();
+            var mineToScore = state.mines.ToDictionary(m => m.Id, m => state.components.Select(n => n.Score.Scores[m.Id]).OrderByDescending(s => s).Take(chartSize).Sum());
+            return state.components.OrderByDescending(n => n.Score.Mines.Sum(x => mineToScore[x.Id])).First();
         }
 
         public bool IsConnected(DesireComponent component)
@@ -173,7 +185,7 @@ namespace Core.Components
 
         public Component[] GetMineComponents()
         {
-            return components.Where(x => x.Score.Mines.Any()).ToArray();
+            return state.components.Where(x => x.Score.Mines.Any()).ToArray();
         }
 
         private Dictionary<Component, int> Bfs(Component a, Component b, DesireComponent avaliableComponents = null)
@@ -240,7 +252,7 @@ namespace Core.Components
 
         public Edge GetMostExpensiveEdge()
         {
-            return map.Edges
+            return state.map.Edges
                 .Where(x => x.Punter == null)
                 .GroupBy(x => (nodeToComponent[x.Source.Id], nodeToComponent[x.Target.Id]))
                 .OrderByDescending(x => x.Key.Item1.Score.Clone().Add(x.Key.Item2.Score).SelfScore
@@ -325,7 +337,7 @@ namespace Core.Components
 
         private (Component, int, Edge)[] GetEdges(Component from)
         {
-            return from.Nodes.SelectMany(n => map.GetFreeEdges(n.Id))
+            return from.Nodes.SelectMany(n => state.map.GetFreeEdges(n.Id))
                 .GroupBy(n => nodeToComponent[n.Item1.Id])
                 .Select(x => (x.Key, x.Count(), x.First().Item2))
                 .Where(x => x.Item1 != from)
@@ -335,7 +347,7 @@ namespace Core.Components
         private Edge GetFreeEdge(Component a, Component b)
         {
             return a.Nodes
-                .SelectMany(n => map.GetFreeEdges(n.Id))
+                .SelectMany(n => state.map.GetFreeEdges(n.Id))
                 .First(n => nodeToComponent[n.Item1.Id] == b)
                 .Item2;
         }

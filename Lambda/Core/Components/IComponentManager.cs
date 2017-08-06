@@ -21,5 +21,7 @@ namespace Core.Components
         Edge GetMostExpensiveFromComponentEdge(Component from);
         Edge GetMaxSubtreeEdge(DesireComponent desire);
         Edge GetFragileEdge(DesireComponent desire);
+
+        ComponentManagerState State { get; set; }
     }
 }

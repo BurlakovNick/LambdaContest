@@ -10,6 +10,10 @@ namespace Core.Components
         public Dictionary<int, long> Scores { get; set; }
         public long SelfScore { get; set; }
 
+        public ComponentScore()
+        {
+        }
+
         public ComponentScore(List<Node> mines, Dictionary<int, long> scores)
         {
             Mines = mines;

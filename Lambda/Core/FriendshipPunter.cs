@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Core.Components;
 using Core.Objects;
 
@@ -7,62 +8,87 @@ namespace Core
     public class FriendshipPunter : IPunter
     {
         private readonly IScorer scorer;
-        private PunterState state;
-        private int movesCount;
-        private int lambdasCount;
-        private IComponentManager componentManager;
         private IPunter nikitaPunter;
         private IGraphVisitor graphVisitor;
-        private DesireComponent desire;
+        private PunterState state;
+
+        private IComponentManager componentManager;
 
         public FriendshipPunter(IScorer scorer)
         {
             this.scorer = scorer;
             graphVisitor = new GraphVisitor();
             componentManager = new ComponentManager(scorer);
-            state = new PunterState();
+            state = new PunterState
+            {
+                
+            };
+        }
+
+        public PunterState State
+        {
+            get
+            {
+                state.ComponentManagerState = componentManager.State;
+                return state;
+            }
+            set
+            {
+                state = value;
+                componentManager.State = state.ComponentManagerState;
+                if (state.desire != null)
+                {
+                    state.desire.UpdateComponents(componentManager.State.components);
+                }
+            }
         }
 
         public void Init(Map map, int puntersCount, Punter punter)
         {
-            movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
+            state.movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
+            state.puntersCount = puntersCount;
             scorer.Init(map);
-            nikitaPunter = new BargeHauler5(scorer, graphVisitor);
             componentManager.InitComponents(map, punter);
             var mineCount = componentManager.GetMineComponents().Length;
-            lambdasCount = Math.Max(Math.Min(movesCount / 20, 2 * mineCount), mineCount);
-            desire = new DesireComponent();
+            state.lambdasCount = Math.Max(Math.Min(state.movesCount / 20, 2 * mineCount), mineCount);
+            state.desire = new DesireComponent();
         }
 
         public Edge Claim(GameState gameState)
         {
+            if (state.puntersCount == 2)
+            {
+                return new BargeHauler3(scorer, graphVisitor).Claim(gameState);
+            }
+
             componentManager.UpdateMap(gameState.Map);
             Edge edge;
 
-            if (lambdasCount > 0)
+            if (state.lambdasCount > 0)
             {
                 edge = componentManager.GetMineEdge();
-                --lambdasCount;
+                --state.lambdasCount;
             }
             else
             {
-                if (desire != null && (desire.Components.Count <= 1 || !componentManager.IsConnected(desire)))
+                if (state.desire != null && (state.desire.Components.Count <= 1 || !componentManager.IsConnected(state.desire)))
                 {
-                    desire = GetDesire();
+                    state.desire = GetDesire();
                 }
-                edge = desire == null
-                    ? nikitaPunter.Claim(gameState)
-                    : componentManager.GetFragileEdge(desire);
+
+                edge = state.desire == null
+                    ? new BargeHauler3(scorer, graphVisitor).Claim(gameState)
+                    : componentManager.GetFragileEdge(state.desire);
             }
 
-            componentManager.ClaimEdge(edge.Source, edge.Target, desire);
-            movesCount--;
+            componentManager.ClaimEdge(edge.Source, edge.Target, state.desire);
+            state.movesCount--;
             return edge;
         }
 
         private DesireComponent GetDesire()
         {
-            var minLength = movesCount;
+            var minLength = state.movesCount;
             Component a = null, b = null;
             var mineComponents = componentManager.GetMineComponents();
             for (var i = 0; i < mineComponents.Length; ++i)
@@ -86,12 +112,6 @@ namespace Core
             var result = componentManager.FindShortestPath(a, b);
             result.Root = a.Score.SelfScore > b.Score.SelfScore ? a : b;
             return result;
-        }
-
-        public PunterState State
-        {
-            get => state;
-            set => state = value;
         }
     }
 }

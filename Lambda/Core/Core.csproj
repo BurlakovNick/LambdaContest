@@ -63,6 +63,7 @@
     <Compile Include="BargeHauler6.cs" />
     <Compile Include="BargeHauler7.cs" />
     <Compile Include="Components\ComponentManager.cs" />
+    <Compile Include="Components\ComponentManagerState.cs" />
     <Compile Include="Components\ComponentScore.cs" />
     <Compile Include="Components\DesireComponent.cs" />
     <Compile Include="Components\IComponentManager.cs" />
