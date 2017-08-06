@@ -14,11 +14,6 @@ namespace Referee
     {
         static void Main(string[] args)
         {
-            if (Directory.Exists("Results"))
-                Directory.Delete("Results", true);
-	        if (File.Exists("log.txt"))
-		        File.Delete("log.txt");
-			args = args.Length == 0 ? new[] { "RandomPunter", "RandomPunter" } : args;
             Run(args);
         }
 
@@ -27,7 +22,7 @@ namespace Referee
             Log("#################################################");
             Log(string.Join(" VS ", punters));
             Log("#################################################");
-	        var maps = GetAllMaps();
+            var maps = GetAllMaps().Where(x => x == "sample").ToArray();
             var i = 1;
             foreach (var map in maps)
             {
@@ -83,11 +78,9 @@ namespace Referee
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
             File.Copy("moves.txt", Path.Combine(folder, "moves.txt"));
-	        if (File.Exists("passes.txt"))
-		        File.Copy("passes.txt", Path.Combine(folder, "passes.txt"));
-	        if (File.Exists("errors.txt"))
-		        File.Copy("errors.txt", Path.Combine(folder, "errors.txt"));
-		}
+            if (File.Exists("passes.txt"))
+                File.Copy("passes.txt", Path.Combine(folder, "passes.txt"));
+        }
 
         private static Tuple<Who, ScoreContract>[] GetScores()
         {
@@ -105,33 +98,15 @@ namespace Referee
         private static void RunServer(string mapName,
                                       int playersCount)
         {
-	        try
-	        {
-		        var exeName = Path.Combine(GetServerFolder(), "Server.exe");
-		        Log($"Run server with {mapName} {playersCount}");
-		        Process.Start(exeName, $"{mapName} {playersCount}").WaitForExit();
-			}
-	        catch (Exception e)
-		    {
-			    Log($"Error: {e}");
-			    throw;
-		    }
-	    }
+            var exeName = Path.Combine(GetServerFolder(), "Server.exe");
+            Process.Start(exeName, $"{mapName} {playersCount}").WaitForExit();
+        }
 
-	    private static void RunClient(string punterName)
-	    {
-		    try
-		    {
-			    var exeName = Path.Combine(GetClientFolder(), "Client.exe");
-			    Log($"Run client with {punterName}");
-			    Process.Start(exeName, punterName).WaitForExit();
-		    }
-		    catch (Exception e)
-		    {
-			    Log($"Error: {e}");
-			    throw;
-		    }
-	    }
+        private static void RunClient(string punterName)
+        {
+            var exeName = Path.Combine(GetClientFolder(), "Client.exe");
+            Process.Start(exeName, punterName).WaitForExit();
+        }
 
         private static string[] GetAllMaps()
         {
