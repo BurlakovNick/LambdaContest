@@ -59,6 +59,9 @@
     <Compile Include="BargeHauler2.cs" />
     <Compile Include="BargeHauler3.cs" />
     <Compile Include="BargeHauler4.cs" />
+    <Compile Include="BargeHauler5.cs" />
+    <Compile Include="BargeHauler6.cs" />
+    <Compile Include="BargeHauler7.cs" />
     <Compile Include="Components\ComponentManager.cs" />
     <Compile Include="Components\ComponentScore.cs" />
     <Compile Include="Components\DesireComponent.cs" />

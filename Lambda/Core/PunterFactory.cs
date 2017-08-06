@@ -34,6 +34,12 @@ namespace Core
                     return new BargeHauler3(scorer, visitor);
                 case "BargeHauler4":
                     return new BargeHauler4(scorer, visitor);
+                case "BargeHauler5":
+                    return new BargeHauler5(scorer, visitor);
+                case "BargeHauler6":
+                    return new BargeHauler6(scorer, visitor);
+                case "BargeHauler7":
+                    return new BargeHauler7(scorer, visitor);
                 case "MineConnecterPunter":
                     return new MineConnecterPunter(scorer);
                 case "MineConnecterFullPunter":
