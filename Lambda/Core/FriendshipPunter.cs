@@ -27,7 +27,7 @@ namespace Core
         {
             movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
             scorer.Init(map);
-            nikitaPunter = new BargeHauler4(scorer, graphVisitor);
+            nikitaPunter = new BargeHauler5(scorer, graphVisitor);
             componentManager.InitComponents(map, punter);
             var mineCount = componentManager.GetMineComponents().Length;
             lambdasCount = Math.Max(Math.Min(movesCount / 20, 2 * mineCount), mineCount);
