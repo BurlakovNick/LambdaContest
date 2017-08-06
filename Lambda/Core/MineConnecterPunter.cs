@@ -1,4 +1,6 @@
-﻿using Core.Components;
+﻿using System;
+using System.Text.RegularExpressions;
+using Core.Components;
 using Core.Objects;
 
 namespace Core
@@ -8,6 +10,7 @@ namespace Core
         private readonly IScorer scorer;
         private PunterState state;
         private int movesCount;
+        private int lambdasCount;
         private IComponentManager componentManager;
         private DesireComponent desire;
 
@@ -23,22 +26,31 @@ namespace Core
             movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
             scorer.Init(map);
             componentManager.InitComponents(map, punter);
-
-            desire = GetDesire();
+            var mineCount = componentManager.GetMineComponents().Length;
+            lambdasCount = Math.Max(Math.Min(movesCount / 20, 2 * mineCount), mineCount);
+            desire = new DesireComponent();
         }
 
         public Edge Claim(GameState gameState)
         {
             componentManager.UpdateMap(gameState.Map);
-
             Edge edge;
-            if (desire != null && (desire.Components.Count == 1 || !componentManager.IsConnected(desire)))
+
+            if (lambdasCount > 0)
             {
-                desire = GetDesire();
+                edge = componentManager.GetMineEdge();
+                --lambdasCount;
             }
-            edge = desire == null
-                ? componentManager.GetMostExpensiveEdge()
-                : componentManager.GetFragileEdge(desire);
+            else
+            {
+                if (desire != null && (desire.Components.Count <= 1 || !componentManager.IsConnected(desire)))
+                {
+                    desire = GetDesire();
+                }
+                edge = desire == null
+                    ? componentManager.GetMostExpensiveEdge()
+                    : componentManager.GetFragileEdge(desire);
+            }
 
             componentManager.ClaimEdge(edge.Source, edge.Target, desire);
             movesCount--;
