@@ -1,4 +1,4 @@
-start Server\bin\Debug\Server.exe oxford 2
+start Server\bin\Debug\Server.exe oxford 4
 #start Client\bin\Debug\Client.exe GreedyComponentPunter
 #start Client\bin\Debug\Client.exe AlwaysFirstPunter
 #start Client\bin\Debug\Client.exe GreedyDesiredPunter

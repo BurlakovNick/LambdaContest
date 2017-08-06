@@ -208,7 +208,31 @@ namespace Core.Components
 
         public Edge GetMineEdge()
         {
-            throw new NotImplementedException();
+            var mines = GetMineComponents();
+            var mine = mines
+                .Select(x => (x, GetEdges(x).Sum(y => y.Item2)))
+                .Where(x => x.Item2 > 0)
+                .OrderBy(x => x.Item2)
+                .ThenByDescending(x => x.Item1.Score.SelfScore)
+                .Take(3)
+                .Select(x => (x.Item1, Bfs(x.Item1, null).Count))
+                .OrderByDescending(x => x.Item2)
+                .Select(x => x.Item1)
+                .FirstOrDefault();
+            if (mine == null)
+            {
+                return GetMostExpensiveEdge();
+            }
+            var neighbour = GetEdges(mine)
+                .Select(x => (x.Item1, GetEdges(x.Item1).Where(y => y.Item1 != mine).Sum(y => y.Item2)))
+                .OrderByDescending(x => x.Item2)
+                .Select(x => x.Item1)
+                .FirstOrDefault();
+            if (neighbour == null)
+            {
+                return GetMostExpensiveEdge();
+            }
+            return GetFreeEdge(mine, neighbour);
         }
 
         public Edge GetMostExpensiveEdge()
