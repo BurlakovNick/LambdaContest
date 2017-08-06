@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Core;
 using Core.Contracts;
@@ -13,39 +15,43 @@ namespace Client
     {
         private GameSession session;
         private readonly IPunter punter;
-        private readonly Action<string> log;
         private readonly Serializer serializer = new Serializer();
 
-        public OnlineClient(IPunter punter,
-                            ILog log)
+        public OnlineClient(IPunter punter)
         {
             this.punter = punter;
-            this.log = log.Log;
         }
 
-        public void Start()
+        public void Start(string server, string port)
         {
-            session = new GameSession();
+            try
+            {
+                session = new GameSession();
 
-            var tcpClient = new SimpleTcpClient().Connect("localhost", 7777);
-            log("tcp client connected to server");
-            tcpClient.DataReceived += TcpClient_DataReceived;
+                var tcpClient = new SimpleTcpClient().Connect(server, int.Parse(port));
+                Log("tcp client connected to server");
 
-            var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)} {punter.GetType().Name}" };
-            log($"Begin handshake as {handshakeCommand.me}");
-            var reply = tcpClient.WriteAndGetReply(serializer.Serialize(handshakeCommand), TimeSpan.MaxValue);
-            var handshakeMessage = serializer.Deserialize<HandshakeMessage>(reply.MessageString);
-            if (handshakeMessage.you != handshakeCommand.me)
-                throw new Exception($"me: {handshakeCommand.me}, you: {handshakeMessage.you}");
-            session.Status = GameStatus.Setup;
+                var handshakeCommand = new HandshakeCommand { me = $"player{new Random().Next(1000)} {punter.GetType().Name}" };
+                Log($"Begin handshake as {handshakeCommand.me}");
+                var reply = tcpClient.WriteAndGetReply(serializer.Serialize(handshakeCommand), TimeSpan.MaxValue);
+                session.Status = GameStatus.Setup;
+                tcpClient.DataReceived += TcpClient_DataReceived;
+                var handshakeMessage = serializer.Deserialize<HandshakeMessage>(reply.MessageString);
+                if (handshakeMessage.you != handshakeCommand.me)
+                    throw new Exception($"me: {handshakeCommand.me}, you: {handshakeMessage.you}");
+            }
+            catch (Exception e)
+            {
+                Log(e.ToString());
+            }
         }
 
-        private void TcpClient_DataReceived(object sender,
+	    private void TcpClient_DataReceived(object sender,
                                             Message e)
         {
             try
             {
-                log($"Handling message in TcpClient_DataReceived. Message: {e.MessageString}");
+                Log($"Handling message in TcpClient_DataReceived. Message: {e.MessageString}, Status: {session.Status}");
                 switch (session.Status)
                 {
                     case GameStatus.Setup:
@@ -62,20 +68,20 @@ namespace Client
             }
             catch (Exception exception)
             {
-                log("ERROR: " + exception);
+                Log("ERROR: " + exception);
                 throw;
             }
         }
 
-        private void HandleSetup(Message e)
+	    private void HandleSetup(Message e)
         {
-            log("HandleSetup");
+            Log("HandleSetup");
             var setupMessage = serializer.Deserialize<SetupMessage>(e.MessageString);
             session.setupMessage = setupMessage;
             session.MyId = setupMessage.punter;
             session.Map = Converter.Convert(setupMessage.map);
 
-            log($"##############################My Id is {session.MyId}");
+            Log($"##############################My Id is {session.MyId}");
 
             punter.Init(session.Map, setupMessage.punters, new Punter { Id = setupMessage.punter });
 
@@ -87,13 +93,14 @@ namespace Client
             session.Status = GameStatus.Gameplay;
         }
 
-        private void HandleGameplay(Message e)
+	    private void HandleGameplay(Message e)
         {
-            log("HandleGameplay");
+            Log("HandleGameplay");
             var moveMessage = serializer.Deserialize<MoveMessage>(e.MessageString);
             if (moveMessage.IsStop)
             {
                 ShowScores(moveMessage.stop.scores);
+                Environment.Exit(0);
             }
             else
             {
@@ -125,9 +132,15 @@ namespace Client
             }
         }
 
-        private void ShowScores(MoveMessage.Score[] scores)
+	    private void ShowScores(MoveMessage.Score[] scores)
         {
-            log("scores: " + serializer.Serialize(scores));
+            Log("scores: " + serializer.Serialize(scores));
         }
+
+	    private static void Log(string text)
+	    {
+		    Console.Out.WriteLine(text);
+		    File.AppendAllLines($"client{Process.GetCurrentProcess().Id}Log.txt", new[] { text });
+	    }
     }
 }

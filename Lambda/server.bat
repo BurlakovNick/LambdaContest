@@ -1,1 +1,1 @@
-start Server\bin\Debug\Server.exe lambda 2
+start Server\bin\Debug\Server.exe randomSparse 2

@@ -34,10 +34,15 @@ namespace Core.Objects
 
         public List<(Node, Edge)> GetEdges(int fromNodeId) => nodeEdges[fromNodeId];
 
+        public List<(Node, Edge)> GetPunterEdges(int fromNodeId, Punter punter) =>
+            nodeEdges[fromNodeId]
+                .Where(x => x.Item2.Punter != null && x.Item2.Punter.Id == punter.Id)
+                .ToList();
+
         public List<(Node, Edge)> GetAvaliableEdges(int fromNodeId,
                                                     Punter punter) =>
             nodeEdges[fromNodeId]
-                .Where(e => e.Item2.Punter == null || e.Item2.Punter == punter)
+                .Where(e => e.Item2.Punter == null || e.Item2.Punter.Id == punter.Id)
                 .ToList();
 
         public List<(Node, Edge)> GetFreeEdges(int fromNodeId) =>

@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Linq;
+using System.Diagnostics;
+using System.IO;
 using Core;
-using Core.GreedyComponent;
 
 namespace Client
 {
@@ -9,30 +9,29 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            var punterName = args[0];
-            
-            var punter = GetPunter(punterName);
-            var log = new ConsoleLog();
-            var client = new OnlineClient(punter, log);
-            client.Start();
-            Console.ReadLine();
+            try
+            {
+                Log("Client started " + args[0]);
+                var punterName = args[0];
+                var server = args.Length > 1 ? args[1] : "localhost";
+                var port = args.Length > 2 ? args[2] : "7777";
+
+                var punter = PunterFactory.Create(punterName);
+                var client = new OnlineClient(punter);
+                client.Start(server, port);
+                Console.ReadLine();
+            }
+            catch (Exception e)
+            {
+                Log("Error:" + e);
+                throw;
+            }
         }
 
-        private static IPunter GetPunter(string name)
+        private static void Log(string text)
         {
-            switch (name)
-            {
-                case "greedy":
-                    return new GreedyComponentPunter(new Scorer(new DistanceCalculator(), new GraphVisitor()));
-                case "first":
-                    return new AlwaysFirstPunter();
-                case "stupidgreedy":
-                    var visitor = new GraphVisitor();
-                    return new GreedyEdgeChooserPunter(new Scorer(new DistanceCalculator(), visitor), visitor);
-                case "random":
-                default:
-                    return new RandomPunter();
-            }
+            Console.WriteLine(text);
+            File.WriteAllText($"client{Process.GetCurrentProcess().Id}Log.txt", text);
         }
     }
 }

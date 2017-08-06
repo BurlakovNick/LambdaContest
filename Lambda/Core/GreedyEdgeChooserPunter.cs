@@ -31,6 +31,12 @@ namespace Core
             var map = gameState.Map;
             var punter = gameState.CurrentPunter;
 
+            var connectedComponents = graphVisitor.GetConnectedComponents(map);
+            var punters = connectedComponents.GetPunters;
+            var scoreByPunter = punters
+                .ToDictionary(x => x,
+                    x => scorer.Score(new GameState {Map = map, CurrentPunter = new Punter {Id = x}}));
+
             var reachableNodeIds = GetReachableNodesFromMines(map, punter);
 
             var bestIncreasingPathEdge = map
@@ -40,7 +46,7 @@ namespace Core
                             reachableNodeIds.Contains(x.Target.Id) ||
                             x.Source.IsMine ||
                             x.Target.IsMine)
-                .OrderByDescending(x => GetWeight(gameState, x, punter, reachableNodeIds))
+                .OrderByDescending(x => GetWeight(x, punter, connectedComponents))
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .FirstOrDefault();
 
@@ -49,38 +55,61 @@ namespace Core
                 return bestIncreasingPathEdge;
             }
 
+            var bestPunter = new Punter
+            {
+                Id = scoreByPunter.OrderByDescending(x => x.Value).First().Key
+            };
+
+            if (bestPunter.Id != punter.Id)
+            {
+                return map
+                    .Edges
+                    .Where(x => x.Punter == null)
+                    .OrderByDescending(x => !connectedComponents.IsInSameComponent(x.Source.Id, x.Target.Id, punter.Id))
+                    .ThenByDescending(x => HasNeighborPunterEdge(map, x, bestPunter))
+                    .ThenBy(x => Guid.NewGuid())
+                    .FirstOrDefault(x => x.Punter == null);
+            }
+
             return map
                 .Edges
-                .OrderByDescending(x => CountEnemyNeighborEdges(gameState, x))
+                .Where(x => x.Punter == null)
+                .OrderByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .ThenBy(x => Guid.NewGuid())
                 .FirstOrDefault(x => x.Punter == null);
         }
 
-        private int GetWeight(GameState gameState, Edge claimEdge, Punter punter, HashSet<int> reachableNodeIds)
+        private static bool HasNeighborPunterEdge(Map map, Edge edge, Punter punter)
         {
-            claimEdge.Punter = punter;
+            var from = edge.Source.Id;
+            var to = edge.Target.Id;
 
-            if (GetReachableNodesFromMines(gameState.Map, punter).Count == reachableNodeIds.Count)
+            return map.GetPunterEdges(@from, punter).Count > 0 ||
+                   map.GetPunterEdges(to, punter).Count > 0;
+        }
+
+        private int GetWeight(Edge claimEdge, Punter punter, PunterConnectedComponents punterConnectedComponents)
+        {
+            if (punterConnectedComponents.IsInSameComponent(claimEdge.Source.Id, claimEdge.Target.Id, punter.Id))
             {
-                claimEdge.Punter = null;
                 return 0;
             }
 
-            var newScore = scorer.Score(gameState);
+            claimEdge.Punter = punter;
+
+            var leftComponent = punterConnectedComponents.GetComponent(punter.Id, claimEdge.Source.Id);
+            var rightComponent = punterConnectedComponents.GetComponent(punter.Id, claimEdge.Target.Id);
+
+            var scoreDelta = scorer.ScoreForUnitingComponents(leftComponent, rightComponent);
+
             claimEdge.Punter = null;
-            return newScore;
+            return scoreDelta;
         }
 
         private HashSet<int> GetReachableNodesFromMines(Map map, Punter punter)
         {
             var reachableNodes = graphVisitor.GetReachableNodesFromMinesForPunter(map, punter);
             return new HashSet<int>(reachableNodes.Select(x => x.Id));
-        }
-
-        private int CountEnemyNeighborEdges(GameState gameState, Edge claimEdge)
-        {
-            return (gameState.Map.GetEdges(claimEdge.Source.Id).Count - gameState.Map.GetAvaliableEdges(claimEdge.Source.Id, gameState.CurrentPunter).Count) +
-                   (gameState.Map.GetEdges(claimEdge.Target.Id).Count - gameState.Map.GetAvaliableEdges(claimEdge.Target.Id, gameState.CurrentPunter).Count);
         }
 
         private int CountFreeNeighborEdges(GameState gameState, Edge claimEdge)
