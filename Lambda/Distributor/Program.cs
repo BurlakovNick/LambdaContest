@@ -59,6 +59,10 @@ namespace Distributor
 
 				try
 				{
+					ProcessHelpers.KillProcess("Referee.exe", agent);
+					ProcessHelpers.KillProcess("Server.exe", agent);
+					ProcessHelpers.KillProcess("Client.exe", agent);
+
 					RunBattle(agent, battle);
 				}
 				catch (Exception e)

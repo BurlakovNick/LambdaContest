@@ -16,7 +16,9 @@ namespace Referee
         {
             if (Directory.Exists("Results"))
                 Directory.Delete("Results", true);
-            args = args.Length == 0 ? new[] { "RandomPunter", "RandomPunter" } : args;
+	        if (File.Exists("log.txt"))
+		        File.Delete("log.txt");
+			args = args.Length == 0 ? new[] { "RandomPunter", "RandomPunter" } : args;
             Run(args);
         }
 
@@ -103,15 +105,33 @@ namespace Referee
         private static void RunServer(string mapName,
                                       int playersCount)
         {
-            var exeName = Path.Combine(GetServerFolder(), "Server.exe");
-            Process.Start(exeName, $"{mapName} {playersCount}").WaitForExit();
-        }
+	        try
+	        {
+		        var exeName = Path.Combine(GetServerFolder(), "Server.exe");
+		        Log($"Run server with {mapName} {playersCount}");
+		        Process.Start(exeName, $"{mapName} {playersCount}").WaitForExit();
+			}
+	        catch (Exception e)
+		    {
+			    Log($"Error: {e}");
+			    throw;
+		    }
+	    }
 
-        private static void RunClient(string punterName)
-        {
-            var exeName = Path.Combine(GetClientFolder(), "Client.exe");
-            Process.Start(exeName, punterName).WaitForExit();
-        }
+	    private static void RunClient(string punterName)
+	    {
+		    try
+		    {
+			    var exeName = Path.Combine(GetClientFolder(), "Client.exe");
+			    Log($"Run client with {punterName}");
+			    Process.Start(exeName, punterName).WaitForExit();
+		    }
+		    catch (Exception e)
+		    {
+			    Log($"Error: {e}");
+			    throw;
+		    }
+	    }
 
         private static string[] GetAllMaps()
         {
