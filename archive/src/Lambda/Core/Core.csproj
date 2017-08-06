@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EDB0048C-B721-4868-A81B-E3B27217E2A0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Core</RootNamespace>
+    <AssemblyName>Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FluentAssertions, Version=4.19.3.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.19.3\lib\net45\FluentAssertions.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentAssertions.Core, Version=4.19.3.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.19.3\lib\net45\FluentAssertions.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Annotations, Version=11.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.11.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.7.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.3.1\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AlwaysFirstPunter.cs" />
+    <Compile Include="Contracts\Claim.cs" />
+    <Compile Include="Contracts\Converters\Converter.cs" />
+    <Compile Include="Contracts\GameStateMessage.cs" />
+    <Compile Include="Contracts\HandshakeCommand.cs" />
+    <Compile Include="Contracts\HandshakeMessage.cs" />
+    <Compile Include="Contracts\MapContract.cs" />
+    <Compile Include="Contracts\MoveCommand.cs" />
+    <Compile Include="Contracts\MoveMessage.cs" />
+    <Compile Include="Contracts\Pass.cs" />
+    <Compile Include="Contracts\RiverContract.cs" />
+    <Compile Include="Contracts\SetupCommand.cs" />
+    <Compile Include="Contracts\SetupMessage.cs" />
+    <Compile Include="Contracts\SiteContract.cs" />
+    <Compile Include="DistanceCalculator.cs" />
+    <Compile Include="GraphVisitor.cs" />
+    <Compile Include="GreedyComponent\Component.cs" />
+    <Compile Include="GreedyComponent\GreedyComponentPunter.cs" />
+    <Compile Include="GreedyEdgeChooserPunter.cs" />
+    <Compile Include="GreedyDesired\GreedyDesiredPunter.cs" />
+    <Compile Include="IDistanceCalculator.cs" />
+    <Compile Include="IGraphVisitor.cs" />
+    <Compile Include="Infrastructure\Serializer.cs" />
+    <Compile Include="Infrastructure\ILog.cs" />
+    <Compile Include="Infrastructure\ConsoleLog.cs" />
+    <Compile Include="IPunter.cs" />
+    <Compile Include="IScorer.cs" />
+    <Compile Include="Objects\Edge.cs" />
+    <Compile Include="Objects\Game.cs" />
+    <Compile Include="Objects\GameState.cs" />
+    <Compile Include="Objects\Map.cs" />
+    <Compile Include="Objects\Node.cs" />
+    <Compile Include="Objects\PunterState.cs" />
+    <Compile Include="Objects\ScorerState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Objects\Punter.cs" />
+    <Compile Include="RandomPunter.cs" />
+    <Compile Include="Scorer.cs" />
+    <Compile Include="ShortestDistance.cs" />
+    <Compile Include="Tests\DistanceCalculatorTest.cs" />
+    <Compile Include="Tests\GraphVisitorTest.cs" />
+    <Compile Include="Tests\ScorerTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
