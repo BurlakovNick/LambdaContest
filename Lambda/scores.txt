@@ -1,1 +1,1 @@
-[{"Punter":0,"Score":5647717},{"Punter":1,"Score":3600809}]
+[{"Punter":0,"Score":24907},{"Punter":1,"Score":57673},{"Punter":2,"Score":68632},{"Punter":3,"Score":143885},{"Punter":4,"Score":68200}]
