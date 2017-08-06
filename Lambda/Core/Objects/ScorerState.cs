@@ -4,6 +4,7 @@ namespace Core.Objects
 {
     public class ScorerState
     {
-        public Dictionary<int, Dictionary<int, int>> DistancesFromMines  { get; set; }
+        public Node[] Mines { get; set; }
+        public Dictionary<int, Dictionary<int, int>> DistancesFromMines { get; set; }
     }
 }

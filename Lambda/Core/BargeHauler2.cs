@@ -1,16 +1,18 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Objects;
 
 namespace Core
 {
-    public class GreedyEdgeChooserPunterWithStupidZergRush : IPunter
+    //Здесь научились делать GetShortestDistanceToMineInOtherComponent - при равенстве очков сближаем связанные компоненты друг с другом
+    public class BargeHauler2 : IPunter
     {
         private readonly IScorer scorer;
         private readonly IGraphVisitor graphVisitor;
+        private int maxScore;
 
-        public GreedyEdgeChooserPunterWithStupidZergRush(
+        public BargeHauler2(
             IScorer scorer,
             IGraphVisitor graphVisitor
         )
@@ -31,19 +33,28 @@ namespace Core
             var map = gameState.Map;
             var punter = gameState.CurrentPunter;
 
-            var connectedComponents = graphVisitor.GetConnectedComponents(map);
-            var punters = connectedComponents.GetPunters;
+            var strictComponents = graphVisitor.GetConnectedComponents(map);
+
+            var punters = strictComponents.GetPunters;
             var scoreByPunter = punters
                 .ToDictionary(x => x,
-                    x => scorer.Score(new GameState { Map = map, CurrentPunter = new Punter { Id = x } }));
+                    x => scorer.Score(new GameState {Map = map, CurrentPunter = new Punter {Id = x}}));
 
             var reachableNodeIds = GetReachableNodesFromMines(map, punter);
 
-            var bestRushingPathEdge = map
+            var rushingEdges = map
                 .Edges
                 .Where(x => x.Source.IsMine || x.Target.IsMine)
                 .Where(x => x.Punter == null)
-                .OrderByDescending(x => GetWeight(x, punter, connectedComponents))
+                .ToArray();
+
+            maxScore = rushingEdges.Length > 0 ? rushingEdges.Max(x => GetWeight(x, punter, strictComponents)) : 1;
+
+            var bestRushingPathEdge = rushingEdges
+                .OrderByDescending(x => CapturedMinesCount(gameState, x))
+                .ThenByDescending(x => GetWeight(x, punter, strictComponents))
+                .ThenBy(x => CountMyNeighborEdges(gameState, x))
+                .ThenBy(x => GetShortestDistanceToMineInOtherComponent(x, strictComponents, punter))
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .FirstOrDefault();
 
@@ -52,14 +63,20 @@ namespace Core
                 return bestRushingPathEdge;
             }
 
-            var bestIncreasingPathEdge = map
+            var increasingEdges = map
                 .Edges
                 .Where(x => x.Punter == null)
                 .Where(x => reachableNodeIds.Contains(x.Source.Id) ||
                             reachableNodeIds.Contains(x.Target.Id) ||
                             x.Source.IsMine ||
                             x.Target.IsMine)
-                .OrderByDescending(x => GetWeight(x, punter, connectedComponents))
+                .ToArray();
+
+            maxScore = increasingEdges.Length > 0 ? increasingEdges.Max(x => GetWeight(x, punter, strictComponents)) : 1;
+
+            var bestIncreasingPathEdge = increasingEdges
+                .OrderByDescending(x => GetWeight(x, punter, strictComponents))
+                .ThenBy(x => GetShortestDistanceToMineInOtherComponent(x, strictComponents, punter))
                 .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .FirstOrDefault();
 
@@ -78,7 +95,7 @@ namespace Core
                 return map
                     .Edges
                     .Where(x => x.Punter == null)
-                    .OrderByDescending(x => !connectedComponents.IsInSameComponent(x.Source.Id, x.Target.Id, punter.Id))
+                    .OrderByDescending(x => !strictComponents.IsInSameComponent(x.Source.Id, x.Target.Id, punter.Id))
                     .ThenByDescending(x => HasNeighborPunterEdge(map, x, bestPunter))
                     .ThenBy(x => Guid.NewGuid())
                     .FirstOrDefault(x => x.Punter == null);
@@ -87,7 +104,8 @@ namespace Core
             return map
                 .Edges
                 .Where(x => x.Punter == null)
-                .OrderByDescending(x => CountFreeNeighborEdges(gameState, x))
+                .OrderBy(x => GetShortestDistanceToMineInOtherComponent(x, strictComponents, punter))
+                .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                 .ThenBy(x => Guid.NewGuid())
                 .FirstOrDefault(x => x.Punter == null);
         }
@@ -113,10 +131,34 @@ namespace Core
             var leftComponent = punterConnectedComponents.GetComponent(punter.Id, claimEdge.Source.Id);
             var rightComponent = punterConnectedComponents.GetComponent(punter.Id, claimEdge.Target.Id);
 
-            var scoreDelta = scorer.ScoreForUnitingComponents(leftComponent, rightComponent);
+            var scalingFactor = Math.Max(10, maxScore / 10);
+            var scoreDelta = (scorer.ScoreForUnitingComponents(leftComponent, rightComponent) + scalingFactor - 1) / scalingFactor;
 
             claimEdge.Punter = null;
             return scoreDelta;
+        }
+
+        private int GetShortestDistanceToMineInOtherComponent(Edge edge,
+            PunterConnectedComponents punterConnectedComponents, Punter punter)
+        {
+            return Math.Min(
+                GetShortestDistanceToMineInOtherComponent(edge.Source, punterConnectedComponents, punter),
+                GetShortestDistanceToMineInOtherComponent(edge.Target, punterConnectedComponents, punter)
+            );
+        }
+
+        private int GetShortestDistanceToMineInOtherComponent(Node node,
+            PunterConnectedComponents punterConnectedComponents, Punter punter)
+        {
+            var minesInOtherComponents = scorer.State.Mines
+                .Where(mine => !punterConnectedComponents.IsInSameComponent(mine.Id, node.Id, punter.Id))
+                .ToArray();
+            if (minesInOtherComponents.Length == 0)
+            {
+                return 1000 * 1000 * 1000;
+            }
+
+            return minesInOtherComponents.Min(mine => scorer.GetDistance(mine, node));
         }
 
         private HashSet<int> GetReachableNodesFromMines(Map map, Punter punter)
@@ -125,10 +167,28 @@ namespace Core
             return new HashSet<int>(reachableNodes.Select(x => x.Id));
         }
 
+        private int CapturedMinesCount(GameState gameState, Edge claimEdge)
+        {
+            return (IsNotCapturedMine(gameState, claimEdge.Source) ? 1 : 0) +
+                   (IsNotCapturedMine(gameState, claimEdge.Target) ? 1 : 0);
+        }
+
+        private bool IsNotCapturedMine(GameState gameState, Node node)
+        {
+            return node.IsMine &&
+                   gameState.Map.GetPunterEdges(node.Id, gameState.CurrentPunter).Count == 0;
+        }
+
         private int CountFreeNeighborEdges(GameState gameState, Edge claimEdge)
         {
             return gameState.Map.GetFreeEdges(claimEdge.Source.Id).Count +
                    gameState.Map.GetFreeEdges(claimEdge.Target.Id).Count;
+        }
+
+        private int CountMyNeighborEdges(GameState gameState, Edge claimEdge)
+        {
+            return gameState.Map.GetPunterEdges(claimEdge.Source.Id, gameState.CurrentPunter).Count +
+                   gameState.Map.GetPunterEdges(claimEdge.Target.Id, gameState.CurrentPunter).Count;
         }
     }
 }

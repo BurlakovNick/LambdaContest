@@ -10,5 +10,14 @@ namespace Core.Components
 
         int FindShortestPathLength(Component a, Component b);
         DesireComponent FindShortestPath(Component a, Component b);
+        DesireComponent FindGreedyFullComponent(int size);
+
+        Component GetBestComponentByChart(int chartSize);
+
+        Edge GetMineEdge();
+        Edge GetMostExpensiveEdge();
+        Edge GetMostExpensiveFromComponentEdge(Component from);
+        Edge GetMaxSubtreeEdge(DesireComponent desire);
+        Edge GetFragileEdge(DesireComponent desire);
     }
 }

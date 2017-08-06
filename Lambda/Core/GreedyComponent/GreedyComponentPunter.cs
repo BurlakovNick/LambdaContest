@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Core.Components;
 using Core.Objects;
@@ -11,7 +12,7 @@ namespace Core.GreedyComponent
         private Node[] mines;
         private List<Component> components;
         private HashSet<Component> desiredComponent;
-        private int movesCount;
+        //private int movesCount;
         private Component first;
         private PunterState state;
 
@@ -24,7 +25,7 @@ namespace Core.GreedyComponent
         public void Init(Map map, int puntersCount, Punter punter)
         {
             scorer.Init(map);
-            movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
+            //movesCount = (map.Edges.Length - punter.Id + puntersCount - 1) / puntersCount;
             mines = map.Nodes.Where(n => n.IsMine).ToArray();
             components = map.Nodes.Select(n => new Component(n, mines, scorer)).ToList();
             FindDesiredComponent(map, punter);
@@ -40,7 +41,7 @@ namespace Core.GreedyComponent
             {
                 FindDesiredComponent(gameState.Map, gameState.CurrentPunter);
             }
-            movesCount--;
+            //movesCount--;
 
             var edgePower = new Dictionary<Edge, (int, Component)>();
             var grey = new List<(Component, Edge)>();
@@ -130,7 +131,8 @@ namespace Core.GreedyComponent
 
         private void FindDesiredComponent(Map map, Punter punter)
         {
-            var top = movesCount / 2;
+            throw new NotImplementedException();
+            /*var top = movesCount / 2;
             var mineToScore = mines.ToDictionary(m => m.Id, m => components.Select(n => n.Scores[m.Id]).OrderByDescending(s => s).Take(top).Sum());
             first = components.OrderByDescending(n => n.Mines.Sum(x => mineToScore[x.Id])).First();
 
@@ -179,7 +181,7 @@ namespace Core.GreedyComponent
                         S.Add((desiredMines.Union(c.Mines).Sum(x => c.Scores[x.Id] + desiredScores[x.Id]) - desiredMines.Sum(x => desiredScores[x.Id]), c));
                     }
                 }
-            }
+            }*/
         }
 
         private Dictionary<int, Component> BuildNodeToComponent()

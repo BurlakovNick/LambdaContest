@@ -1,1 +1,0 @@
-[{"Punter":0,"Score":5647717},{"Punter":1,"Score":3600809}]
