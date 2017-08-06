@@ -13,6 +13,7 @@ namespace Distributor
     {
         private static SemaphoreSlim deploySemaphore;
         private static readonly object lockObject = new object();
+        private static readonly Random random = new Random();
 
         static void Main(string[] args)
         {
@@ -122,47 +123,26 @@ namespace Distributor
 
         private static IEnumerable<string[]> GetAllBattles(string[] allPunters)
         {
-            /*foreach (var x in allPunters)
+            foreach (var x in allPunters)
             foreach (var y in allPunters)
                 yield return new[] { x, y };
 
-            yield return new[]
-                         {
-                             "FriendshipPunter",
-                             "BargeHauler3",
-                             "BargeHauler4",
-                             "MineConnecterPunter",
-                             "MineConnecterFullPunter",
-                             "BargeHauler5",
-                             "BargeHauler6",
-                             "BargeHauler7",
-                         };
-
-            yield return new[]
-                         {
-                             "FriendshipPunter",
-                             "BargeHauler3",
-                             "BargeHauler4",
-                             "MineConnecterPunter",
-                             "MineConnecterFullPunter",
-                             "BargeHauler5",
-                             "BargeHauler6",
-                             "BargeHauler7",
-                             "FriendshipPunter",
-                             "BargeHauler3",
-                             "BargeHauler4",
-                             "MineConnecterPunter",
-                             "MineConnecterFullPunter",
-                             "BargeHauler5",
-                             "BargeHauler6",
-                             "BargeHauler7",
-                         };*/
+            for (var i = 0; i < 10; i++)
+                yield return GetRandomBattle(allPunters, 16).ToArray();
 
             foreach (var x in allPunters)
-            foreach (var y in allPunters.Except(new[] { x }))
-            foreach (var z in allPunters.Except(new[] { x, y }))
-            foreach (var k in allPunters.Except(new[] { x, y, z }))
-                yield return new[] { x, y, z, k };
+            foreach (var y in allPunters)
+            foreach (var z in allPunters)
+                yield return new[] { x, y, z };
+
+            for (var i = 0; i < 10; i++)
+                yield return GetRandomBattle(allPunters, 10).ToArray();
+        }
+
+        private static IEnumerable<string> GetRandomBattle(string[] allPunters, int count)
+        {
+            for (var i = 0; i < count; i++)
+                yield return allPunters[random.Next(0, allPunters.Length - 1)];
         }
 
         private static string[] GetAllPunters()
@@ -170,13 +150,11 @@ namespace Distributor
             return new[]
                    {
                        typeof(FriendshipPunter),
+                       typeof(MaxFriendshipPunter),
                        typeof(BargeHauler3),
                        typeof(BargeHauler4),
-                       typeof(MineConnecterPunter),
-                       typeof(MineConnecterFullPunter),
+                       typeof(GreedyEdgeChooserPunterWithStupidZergRush),
                        typeof(BargeHauler5),
-                       typeof(BargeHauler6),
-                       typeof(BargeHauler7)
                    }
                 .Select(x => x.Name)
                 .ToArray();
