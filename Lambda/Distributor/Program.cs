@@ -168,9 +168,17 @@ namespace Distributor
 
 		private static void Log(string text)
 		{
-			Console.Out.WriteLine(text);
-			lock(lockObject)
-				File.AppendAllLines("log.txt", new[] { $"{DateTime.Now.ToShortTimeString()} {text}" });
+			try
+			{
+				Console.Out.WriteLine(text);
+				lock (lockObject)
+					File.AppendAllLines("log.txt", new[] { $"{DateTime.Now.ToShortTimeString()} {text}" });
+			}
+			catch (Exception e)
+			{
+				Console.Out.WriteLine(text + " " + e.Message);
+				throw;
+			}
 		}
 
 		public static string RoboCopy(string sourceDir,

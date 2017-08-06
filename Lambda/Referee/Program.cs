@@ -12,12 +12,14 @@ namespace Referee
 {
     class Program
     {
+	    private static readonly object lockObject = new object();
+
         static void Main(string[] args)
         {
             if (Directory.Exists("Results"))
                 Directory.Delete("Results", true);
-	        if (File.Exists("log.txt"))
-		        File.Delete("log.txt");
+	        if (File.Exists("refereeLog.txt"))
+		        File.Delete("refereeLog.txt");
 			args = args.Length == 0 ? new[] { "RandomPunter", "RandomPunter" } : args;
             Run(args);
         }
@@ -145,7 +147,8 @@ namespace Referee
         private static void Log(string message)
         {
             Console.Out.WriteLine(message);
-            File.AppendAllLines("log.txt", new[] { message });
+	        lock (lockObject)
+		        File.AppendAllLines("refereeLog.txt", new[] { message });
         }
 
         private class ScoreContract
