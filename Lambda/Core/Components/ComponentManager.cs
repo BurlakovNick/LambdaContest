@@ -35,9 +35,8 @@ namespace Core.Components
             this.map = map;
         }
 
-        public void ClaimEdge(Node a, Node b)
+        public void ClaimEdge(Node a, Node b, DesireComponent desire = null)
         {
-            //todo: придумать что делать с desireComponent при слиянии
             var sourceComponent = nodeToComponent[a.Id];
             var targetComponent = nodeToComponent[b.Id];
             if (sourceComponent != targetComponent)
@@ -47,6 +46,14 @@ namespace Core.Components
                 foreach (var node in targetComponent.Nodes)
                 {
                     nodeToComponent[node.Id] = sourceComponent;
+                }
+                if (desire != null)
+                {
+                    desire.Components.Remove(targetComponent);
+                    if (desire.Root == targetComponent)
+                    {
+                        desire.Root = sourceComponent;
+                    }
                 }
             }
         }
@@ -158,7 +165,13 @@ namespace Core.Components
             return components.OrderByDescending(n => n.Score.Mines.Sum(x => mineToScore[x.Id])).First();
         }
 
-        private Dictionary<Component, int> Bfs(Component a, Component b)
+        public bool IsConnected(DesireComponent component)
+        {
+            var visited = Bfs(component.Components.First(), null, component);
+            return visited.Count == component.Components.Count;
+        }
+
+        private Dictionary<Component, int> Bfs(Component a, Component b, DesireComponent avaliableComponents = null)
         {
             var queue = new Queue<Component>();
             queue.Enqueue(a);
@@ -169,7 +182,10 @@ namespace Core.Components
             {
                 var current = queue.Dequeue();
                 var dist = distance[current];
-                foreach (var neighbour in GetEdges(current))
+                var neighbours = avaliableComponents == null
+                    ? GetEdges(current)
+                    : GetEdges(current).Where(x => avaliableComponents.Components.Contains(x.Item1));
+                foreach (var neighbour in neighbours)
                 {
                     if (!distance.ContainsKey(neighbour.Item1))
                     {
@@ -227,14 +243,59 @@ namespace Core.Components
 
         public Edge GetFragileEdge(DesireComponent desire)
         {
-            throw new NotImplementedException();
+            var edgePower = new Dictionary<Edge, (int, Component)>();
+            var grey = new List<(Component, Edge)>();
+            var color = new Dictionary<Component, int>();
+            calculatePower(desire.Root, desire, edgePower, grey, color);
+
+            return !edgePower.Any()
+                ? GetMostExpensiveEdge()
+                : edgePower.OrderBy(x => x.Value).First().Key;
         }
 
-        private (Component, int)[] GetEdges(Component from)
+        private void calculatePower(Component v, DesireComponent desireComponent, Dictionary<Edge, (int, Component)> edgePower, List<(Component, Edge)> grey, Dictionary<Component, int> color)
+        {
+            color[v] = 1;
+            v.SubtreeSize = 1;
+
+            foreach (var neighbour in GetEdges(v).Where(x => desireComponent.Components.Contains(x.Item1)))
+            {
+                var power = neighbour.Item2;
+                if (!color.ContainsKey(neighbour.Item1))
+                {
+                    var edge = neighbour.Item3;
+                    grey.Add((neighbour.Item1, edge));
+                    edgePower[edge] = (0, neighbour.Item1);
+                    calculatePower(neighbour.Item1, desireComponent, edgePower, grey, color);
+                    v.SubtreeSize += neighbour.Item1.SubtreeSize;
+                }
+                else
+                if (color[neighbour.Item1] == 1)
+                {
+                    for (int i = grey.Count - 1; i >= 0; --i)
+                    {
+                        if (grey[i].Item1 == neighbour.Item1)
+                        {
+                            break;
+                        }
+                        var cur = edgePower[grey[i].Item2];
+                        edgePower[grey[i].Item2] = (cur.Item1 + power, cur.Item2);
+                    }
+                }
+            }
+
+            color[v] = 2;
+            if (grey.Any())
+            {
+                grey.RemoveAt(grey.Count - 1);
+            }
+        }
+
+        private (Component, int, Edge)[] GetEdges(Component from)
         {
             return from.Nodes.SelectMany(n => map.GetFreeEdges(n.Id))
                 .GroupBy(n => nodeToComponent[n.Item1.Id])
-                .Select(x => (x.Key, x.Count()))
+                .Select(x => (x.Key, x.Count(), x.First().Item2))
                 .Where(x => x.Item1 != from)
                 .ToArray();
         }

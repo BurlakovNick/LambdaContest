@@ -6,5 +6,10 @@ namespace Core.Components
     {
         public HashSet<Component> Components { get; set; }
         public Component Root { get; set; }
+
+        public DesireComponent()
+        {
+            Components = new HashSet<Component>();
+        }
     }
 }
