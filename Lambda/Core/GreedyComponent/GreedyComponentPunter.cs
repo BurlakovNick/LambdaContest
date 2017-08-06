@@ -39,6 +39,7 @@ namespace Core.GreedyComponent
             {
                 FindDesiredComponent(gameState.Map, gameState.CurrentPunter);
             }
+            movesCount--;
 
             var edgePower = new Dictionary<Edge, (int, Component)>();
             var grey = new List<(Component, Edge)>();
@@ -54,6 +55,11 @@ namespace Core.GreedyComponent
             {
                 sourceComponent.Union(targetComponent);
                 components.Remove(targetComponent);
+                desiredComponent.Remove(targetComponent);
+                if (first == targetComponent)
+                {
+                    first = sourceComponent;
+                }
             }
             return claimedEdge;
         }

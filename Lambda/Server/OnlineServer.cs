@@ -126,6 +126,7 @@ namespace Server
                                        }
                             };
             var moves = new List<MoveCommand>(lastMoves.move.moves);
+            var claimSet = new HashSet<(int, int)>();
 
             while (moveNumber != map.rivers.Length)
             {
@@ -145,6 +146,16 @@ namespace Server
                         lastMoves.move.moves.RemoveAt(0);
                         lastMoves.move.moves.Add(moveCommand);
                         moves.Add(moveCommand);
+                        if (moveCommand.claim != null)
+                        {
+                            if (claimSet.Contains((moveCommand.claim.source, moveCommand.claim.target)))
+                            {
+                                log($"Punter {connection.Id} claimed what has already been claimed " +
+                                    $"({moveCommand.claim.source}, {moveCommand.claim.target})");
+                            }
+                            claimSet.Add((moveCommand.claim.source, moveCommand.claim.target));
+                            claimSet.Add((moveCommand.claim.target, moveCommand.claim.source));
+                        }
                     }
                     if (moveNumber == map.rivers.Length)
                         break;
