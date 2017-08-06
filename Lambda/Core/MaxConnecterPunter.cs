@@ -4,7 +4,7 @@ using Core.Objects;
 
 namespace Core
 {
-    public class MineConnecterFullPunter : IPunter
+    public class MaxConnecterPunter : IPunter
     {
         private readonly IScorer scorer;
         private PunterState state;
@@ -12,9 +12,8 @@ namespace Core
         private int lambdasCount;
         private IComponentManager componentManager;
         private DesireComponent desire;
-        private DesireComponent fullDesire;
 
-        public MineConnecterFullPunter(IScorer scorer)
+        public MaxConnecterPunter(IScorer scorer)
         {
             this.scorer = scorer;
             componentManager = new ComponentManager(scorer);
@@ -29,7 +28,6 @@ namespace Core
             var mineCount = componentManager.GetMineComponents().Length;
             lambdasCount = Math.Max(Math.Min(movesCount / 20, 2 * mineCount), mineCount);
             desire = new DesireComponent();
-            fullDesire = null;
         }
 
         public Edge Claim(GameState gameState)
@@ -48,29 +46,20 @@ namespace Core
                 {
                     desire = GetDesire();
                 }
-                if (desire == null)
-                {
-                    if (fullDesire == null || fullDesire.Components.Count <= 1 || !componentManager.IsConnected(fullDesire))
-                    {
-                        fullDesire = componentManager.FindGreedyFullComponent(10);
-                    }
-
-                    edge = componentManager.GetFragileEdge(fullDesire);
-                }
-                else
-                {
-                    edge = componentManager.GetFragileEdge(desire);
-                }
+                edge = desire == null
+                    ? componentManager.GetMostExpensiveEdge()
+                    : componentManager.GetFragileEdge(desire);
             }
 
-            componentManager.ClaimEdge(edge.Source, edge.Target, desire ?? fullDesire);
+            componentManager.ClaimEdge(edge.Source, edge.Target, desire);
             movesCount--;
             return edge;
         }
 
         private DesireComponent GetDesire()
         {
-            var minLength = movesCount;
+            long maxScore = 0;
+            DesireComponent result = null;
             Component a = null, b = null;
             var mineComponents = componentManager.GetMineComponents();
             for (var i = 0; i < mineComponents.Length; ++i)
@@ -78,22 +67,25 @@ namespace Core
                 for (var j = 0; j < i; ++j)
                 {
                     var length = componentManager.FindShortestPathLength(mineComponents[i], mineComponents[j]);
-                    if (length < minLength)
+                    if (length < movesCount)
                     {
-                        minLength = length;
-                        a = mineComponents[i];
-                        b = mineComponents[j];
+                        long score;
+                        var desireComponent = componentManager.FindShortestPath(mineComponents[i], mineComponents[j], out score);
+                        if (score > maxScore)
+                        {
+                            maxScore = score;
+                            result = desireComponent;
+                            a = mineComponents[i];
+                            b = mineComponents[j];
+                        }
                     }
                 }
             }
 
-            if (a == null)
+            if (a != null)
             {
-                return null;
+                result.Root = a.Score.SelfScore > b.Score.SelfScore ? a : b;
             }
-            long temp;
-            var result = componentManager.FindShortestPath(a, b, out temp);
-            result.Root = a.Score.SelfScore > b.Score.SelfScore ? a : b;
             return result;
         }
 

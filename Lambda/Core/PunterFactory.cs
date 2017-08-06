@@ -42,6 +42,8 @@ namespace Core
                     return new BargeHauler7(scorer, visitor);
                 case "MineConnecterPunter":
                     return new MineConnecterPunter(scorer);
+                case "MaxConnecterPunter":
+                    return new MaxConnecterPunter(scorer);
                 case "MineConnecterFullPunter":
                     return new MineConnecterFullPunter(scorer);
                 case "FriendshipPunter":
