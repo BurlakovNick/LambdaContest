@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Core;
 using Core.Contracts;
 using Core.Contracts.Converters;
@@ -32,6 +34,12 @@ namespace Server
 
         public void Start(int playersCount)
         {
+            ClearFile("moves.txt");
+            ClearFile("map_command.txt");
+            ClearFile("move_commands.txt");
+            ClearFile("players_count.txt");
+            ClearFile("scores.txt");
+            ClearFile("who.txt");
             session = new GameSession(playersCount);
             tcpServer = new SimpleTcpServer().Start(7777);
             log("Tcp Server listening...");
@@ -81,6 +89,7 @@ namespace Server
         private void Setup()
         {
             var map = GetMap(mapName);
+            LogMapToFile(map, session.PlayersCount);
             scorer.Init(Converter.Convert(map));
             foreach (var x in session.Clients)
             {
@@ -99,16 +108,16 @@ namespace Server
                     throw new Exception("ready must be equal to player id");
             }
 
+            var who = session.Clients.Select(x => new { x.Id, x.Name });
+            File.WriteAllText("who.txt", JsonConvert.SerializeObject(who));
+
             Game(map);
         }
 
         private void Game(MapContract map)
         {
             log("Letsplay =)");
-            if (File.Exists("moves.txt"))
-            {
-                File.Delete("moves.txt");
-            }
+
             var moveNumber = 1;
             var lastMoves = new MoveMessage
                             {
@@ -169,6 +178,14 @@ namespace Server
             Scoring(map, lastMoves.move.moves, moves);
         }
 
+        private static void ClearFile(string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+            }
+        }
+
         private void Scoring(MapContract map,
                              List<MoveCommand> lastMoves,
                              List<MoveCommand> moves)
@@ -176,6 +193,8 @@ namespace Server
             log("SCORING!");
 
             var scores = LogScores(map, moves);
+            var serializedScores = JsonConvert.SerializeObject(scores.Select(x => new { Punter = x.Item1.Id, Score = x.Item2 }));
+            File.WriteAllText("scores.txt", serializedScores);
 
             foreach (var connection in session.Clients)
             {
@@ -195,6 +214,9 @@ namespace Server
                                      };
                 connection.Client.Write(serializer.Serialize(scoringMessage));
             }
+
+            Thread.Sleep(1000);
+            Environment.Exit(0);
         }
 
         private static MapContract GetMap(string name)
@@ -205,10 +227,18 @@ namespace Server
             return map;
         }
 
+        private void LogMapToFile(MapContract map, int playersCount)
+        {
+            File.AppendAllLines("map_command.txt", new[] {JsonConvert.SerializeObject(map)});
+            File.AppendAllLines("players_count.txt", new[] { JsonConvert.SerializeObject(playersCount) });
+        }
+
         private static void LogClaimToFile(int i,
                                            MoveCommand x)
         {
             File.AppendAllLines("moves.txt", new[] { $"{i + 1}: {x.claim.punter} {x.claim.source}->{x.claim.target}" });
+
+            File.AppendAllLines("move_commands.txt", new[] {JsonConvert.SerializeObject(x)});
         }
 
         private (Punter, int)[] LogScores(MapContract map,

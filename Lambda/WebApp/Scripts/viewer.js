@@ -52,7 +52,19 @@ const colours =
     "#FF0000",
     "#00FF00",
     "#f5f904",
-    "#17becf"
+    "#17becf",
+    "#2ca02c",
+    "#ff9896",
+    "#9edae5",
+    "#98df8a",
+    "#c5b0d5",
+    "#d62728",
+    "#9467bd",
+    "#8c564b",
+    "#c49c94",
+    "#e377c2",
+    "#f7b6d2",
+    "#bcbd22"
 ];
 
 function getPunterColour(punter) {
