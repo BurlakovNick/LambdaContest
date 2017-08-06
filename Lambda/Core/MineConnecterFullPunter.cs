@@ -55,7 +55,7 @@ namespace Core
                         fullDesire = componentManager.FindGreedyFullComponent(10);
                     }
 
-                    edge = componentManager.GetFragileEdge(desire);
+                    edge = componentManager.GetFragileEdge(fullDesire);
                 }
                 else
                 {
