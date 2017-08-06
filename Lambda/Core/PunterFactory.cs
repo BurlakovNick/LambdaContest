@@ -36,6 +36,8 @@ namespace Core
                     return new BargeHauler4(scorer, visitor);
                 case "MineConnecterPunter":
                     return new MineConnecterPunter(scorer);
+                case "MineConnecterFullPunter":
+                    return new MineConnecterFullPunter(scorer);
                 case "RandomPunter":
                     return new RandomPunter();
                 default:
