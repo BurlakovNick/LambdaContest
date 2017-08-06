@@ -1,18 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Objects;
 
 namespace Core
 {
-    //Здесь научились делать GetShortestDistanceToMineInOtherComponent - при равенстве очков сближаем связанные компоненты друг с другом
-    public class BargeHauler2 : IPunter
+    public class BargeHauler3 : IPunter
     {
         private readonly IScorer scorer;
         private readonly IGraphVisitor graphVisitor;
         private int maxScore;
+        private int bridgeMaxScore;
 
-        public BargeHauler2(
+        public BargeHauler3(
             IScorer scorer,
             IGraphVisitor graphVisitor
         )
@@ -63,6 +63,32 @@ namespace Core
                 return bestRushingPathEdge;
             }
 
+            var bridgeEdges = graphVisitor
+                .GetBridgesInAvailableEdges(map, punter)
+                .Where(x => x.Punter == null)
+                .ToArray();
+
+            var goodBridges = bridgeEdges
+                .Select(x => new { edge = x, weight = GetWeightForBridge(map, x, punter, reachableNodeIds)})
+                .Where(x => x.weight > 0)
+                .ToArray();
+
+            bridgeMaxScore = goodBridges.Length > 0 ? goodBridges.Max(x => x.weight) : 1;
+            maxScore = goodBridges.Length > 0 ? goodBridges.Max(x => GetWeight(x.edge, punter, strictComponents)) : 1;
+
+            var bestBridge = goodBridges
+                .Select(x => x.edge)
+                .OrderByDescending(x => GetWeightForBridge(map, x, punter, reachableNodeIds))
+                .ThenByDescending(x => GetWeight(x, punter, strictComponents))
+                .ThenBy(x => GetShortestDistanceToMineInOtherComponent(x, strictComponents, punter))
+                .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
+                .FirstOrDefault();
+
+            if (bestBridge != null)
+            {
+                return bestBridge;
+            }
+
             var increasingEdges = map
                 .Edges
                 .Where(x => x.Punter == null)
@@ -94,11 +120,32 @@ namespace Core
 
             if (bestPunter.Id != punter.Id)
             {
+                var enemyBridges = graphVisitor.GetBridgesInAvailableEdges(map, bestPunter).Where(x => x.Punter == null).ToArray();
+
+                if (enemyBridges.Any())
+                {
+                    return enemyBridges
+                        .OrderByDescending(x => !strictComponents.IsInSameComponent(x.Source.Id, x.Target.Id, punter.Id))
+                        .ThenByDescending(x => HasNeighborPunterEdge(map, x, bestPunter))
+                        .ThenBy(x => Guid.NewGuid())
+                        .FirstOrDefault(x => x.Punter == null);
+                }
+
                 return map
                     .Edges
                     .Where(x => x.Punter == null)
                     .OrderByDescending(x => !strictComponents.IsInSameComponent(x.Source.Id, x.Target.Id, punter.Id))
                     .ThenByDescending(x => HasNeighborPunterEdge(map, x, bestPunter))
+                    .ThenBy(x => Guid.NewGuid())
+                    .FirstOrDefault(x => x.Punter == null);
+            }
+
+            if (bridgeEdges.Any())
+            {
+                return bridgeEdges
+                    .Where(x => x.Punter == null)
+                    .OrderBy(x => GetShortestDistanceToMineInOtherComponent(x, strictComponents, punter))
+                    .ThenByDescending(x => CountFreeNeighborEdges(gameState, x))
                     .ThenBy(x => Guid.NewGuid())
                     .FirstOrDefault(x => x.Punter == null);
             }
@@ -138,6 +185,31 @@ namespace Core
                              scalingFactor;
 
             claimEdge.Punter = null;
+            return scoreDelta;
+        }
+
+        private int GetWeightForBridge(Map map, Edge claimEdge, Punter punter, HashSet<int> reachableNodeIds)
+        {
+            claimEdge.Punter = new Punter {Id = -1};
+
+            var leftComponent = graphVisitor.GetReachableNodesForPunter(claimEdge.Source, map, punter, true).Where(x => reachableNodeIds.Contains(x.Id)).ToArray();
+            var rightComponent = graphVisitor.GetReachableNodesForPunter(claimEdge.Target, map, punter, true).Where(x => reachableNodeIds.Contains(x.Id)).ToArray();
+
+            claimEdge.Punter = null;
+
+            var left = leftComponent.Length;
+            var leftMines = leftComponent.Count(x => x.IsMine);
+            var right = rightComponent.Length;
+            var rightMines = rightComponent.Count(x => x.IsMine);
+
+            if (left == 0 || right == 0)
+            {
+                return 0;
+            }
+
+            var scalingFactor = Math.Max(10, bridgeMaxScore / 10);
+            var scoreDelta = ((left - leftMines) * rightMines + (right - rightMines) * leftMines - 1 + scalingFactor) / scalingFactor;
+
             return scoreDelta;
         }
 
