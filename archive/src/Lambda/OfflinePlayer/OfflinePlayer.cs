@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Core;
 using Core.Contracts;
@@ -139,21 +140,6 @@ namespace OfflinePlayer
         private void Score(MoveMessage scoringMessage)
         {
             Log("Let's score");
-            //Не приходит GameState, пока так
-            return;
-
-            var moves = scoringMessage.stop.moves;
-            var scores = scoringMessage.stop.scores;
-            var state = scoringMessage.state;
-
-            var gameState = InitGameState(state, moves);
-
-            var myScore = scorer.Score(gameState);
-            var serverScore = scores.First(x => x.punter == state.MyPunter);
-            if (myScore != serverScore.score)
-            {
-                throw new Exception($"My score: {myScore}, server score: {serverScore}");
-            }
         }
 
         private GameState InitGameState(GameStateMessage state, List<MoveCommand> moves)

@@ -27,21 +27,25 @@ namespace OfflinePlayer
 
             var buffer = new char[1];
             var sb = new StringBuilder();
-            var size = 0;
             while (true)
             {
-                Console.In.Read(buffer, 0, 1);
-                sb.Append(buffer[0]);
-
+                var read = Console.In.Read(buffer, 0, 1);
                 if (buffer[0] == ':')
                 {
                     break;
                 }
 
-                size = size * 10 + (buffer[0] - '0');
+                if (read <= 0 || !char.IsDigit(buffer[0]))
+                    continue;
+
+                sb.Append(buffer[0]);
             }
 
+            Log($"gonna parse {sb} to int");
+            var size = int.Parse(sb.ToString());
             Log($"Message size {size}");
+
+            sb.Append(':');
 
             buffer = new char[size];
             Console.In.ReadBlock(buffer, 0, size);
@@ -54,7 +58,9 @@ namespace OfflinePlayer
 
         private static void Log(string message)
         {
+#if DEBUG
             Console.Error.WriteLine(message);
+#endif
         }
     }
 }

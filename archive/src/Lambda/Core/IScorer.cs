@@ -8,5 +8,6 @@ namespace Core
         int Score(GameState gameState);
         int GetDistance(Node mine, Node node);
         ScorerState State { get; set; }
+        int ScoreForUnitingComponents(int[] leftComponent, int[] rightComponent);
     }
 }

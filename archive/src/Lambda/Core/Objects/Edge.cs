@@ -12,5 +12,11 @@ namespace Core.Objects
 
         [CanBeNull]
         public Punter Punter { get; set; }
+
+        public override string ToString()
+        {
+            var punter = Punter != null? $" by {Punter.Id}" : "";
+            return $"({Source.Id} - {Target.Id}){punter}";
+        }
     }
 }
