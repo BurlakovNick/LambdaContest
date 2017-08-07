@@ -54,7 +54,7 @@ namespace Core
 
         public Edge Claim(GameState gameState)
         {
-            if (state.puntersCount == 3)
+            if (state.puntersCount <= 3)
             {
                 return new BargeHauler3(scorer, graphVisitor).Claim(gameState);
             }
