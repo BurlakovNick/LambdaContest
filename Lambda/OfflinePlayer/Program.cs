@@ -11,7 +11,7 @@ namespace OfflinePlayer
         {
             var scorer = new Scorer(new DistanceCalculator(), new GraphVisitor());
             var graphVisitor = new GraphVisitor();
-            var punter = new FriendshipPunter(scorer);
+            var punter = new MaxFriendshipPunter(scorer);
             var offlinePlayer = new OfflinePlayer(punter, scorer);
 
             offlinePlayer.Play();

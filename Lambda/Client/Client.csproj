@@ -8,9 +8,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Client</RootNamespace>
     <AssemblyName>Client</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -50,6 +51,10 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{edb0048c-b721-4868-a81b-e3b27217e2a0}</Project>
       <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\lib\lib.csproj">
+      <Project>{ea5fe74a-3356-4d19-ad5e-696fffd155d0}</Project>
+      <Name>lib</Name>
     </ProjectReference>
     <ProjectReference Include="..\SimpleTCP\SimpleTCP.csproj">
       <Project>{c9c99f87-e188-49d2-a323-09fe79f39f8d}</Project>
