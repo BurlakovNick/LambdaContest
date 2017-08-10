@@ -19,7 +19,7 @@ namespace Reporter
             var resumes = new Dictionary<string, PunterResume>();
             foreach (var battleResult in battleResults)
             {
-                var puntersCount = battleResult.PunterNames.Length;
+                var puntersCount = battleResult.PunterCount;
                 foreach (var round in battleResult.Rounds)
                 {
                     var winner = round.Punters.OrderByDescending(x => x.Score).First();
@@ -136,17 +136,14 @@ namespace Reporter
             }
             return new BattleResults
                    {
-                       PunterNames = Path.GetFileNameWithoutExtension(fileName)
-                                         .Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries)
-                                         .Where(x => x != "VS")
-                                         .ToArray(),
+                       PunterCount = roundResults.SelectMany(x => x.Punters.Select(y => y.Name)).Count(),
                        Rounds = roundResults.ToArray()
                    };
         }
 
         private class BattleResults
         {
-            public string[] PunterNames { get; set; }
+            public int PunterCount { get; set; }
             public RoundResult[] Rounds { get; set; }
         }
 

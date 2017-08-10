@@ -75,7 +75,7 @@ namespace Referee
         {
             if (!Directory.Exists("Results"))
                 Directory.CreateDirectory("Results");
-            var fileName = Path.Combine("Results", string.Join("_VS_", punters) + ".txt");
+            var fileName = Path.Combine("Results", Guid.NewGuid() + ".txt");
             var sb = new StringBuilder();
             sb.AppendLine($"Map: {map}");
             foreach (var score in scores)
@@ -83,7 +83,7 @@ namespace Referee
             sb.AppendLine("#############################");
             File.AppendAllText(fileName, sb.ToString());
 
-            var folder = Path.Combine("Results", string.Join("_VS_", punters), map);
+            var folder = Path.Combine("Results", Path.GetFileNameWithoutExtension(fileName), map);
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
             File.Copy("moves.txt", Path.Combine(folder, "moves.txt"));

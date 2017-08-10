@@ -11,16 +11,15 @@ namespace Distributor
 {
     class Program
     {
-        private static SemaphoreSlim deploySemaphore;
         private static readonly object lockObject = new object();
+        private static readonly Random random = new Random();
 
         static void Main(string[] args)
         {
             if (Directory.Exists("Results"))
                 Directory.Delete("Results", true);
 
-            deploySemaphore = new SemaphoreSlim(72, 72);
-            var agents = GetAllAgents().Except(new[] { "elba-6" }).ToArray();
+            var agents = GetAllAgents().Except(new[] { "elba-6" }).Take(20).ToArray();
             Log($"{agents.Length} agents");
 
             var allPunters = GetAllPunters();
@@ -81,7 +80,7 @@ namespace Distributor
             const string dir = @"C:\LambdaContest\distr\Referee\bin\Debug\";
             var exe = Path.Combine(dir, "Referee.exe");
             var parameters = string.Join(" ", battle);
-            ProcessHelpers.ExecuteCommand($"PsExec64 \\\\{agent} -w {dir} {exe} {parameters}", ProcessHelpers.FailIfError, Environment.CurrentDirectory);
+            var a = ProcessHelpers.ExecuteCommand($"PsExec64 \\\\{agent} -w {dir} {exe} {parameters}", ProcessHelpers.FailIfError, Environment.CurrentDirectory);
             var resultsFolder = Path.Combine(GetAgentDistrFolder(agent), @"Referee\bin\Debug\Results");
             RoboCopy(resultsFolder, "Results");
         }
@@ -89,12 +88,10 @@ namespace Distributor
         private static void DeployAgent(string agent,
                                         string distrFolder)
         {
-            deploySemaphore.Wait();
             Log($"Deploy agent {agent}");
             var agentDistrFolder = GetAgentDistrFolder(agent);
             RoboCopy(distrFolder, agentDistrFolder);
             Log($"Done deploy agent {agent}");
-            deploySemaphore.Release();
         }
 
         private static string CreateDistributive()
@@ -122,47 +119,17 @@ namespace Distributor
 
         private static IEnumerable<string[]> GetAllBattles(string[] allPunters)
         {
-            /*foreach (var x in allPunters)
-            foreach (var y in allPunters)
-                yield return new[] { x, y };
+            for (var i = 0; i < 10; i++)
+                yield return GetRandomBattle(allPunters, 16).ToArray();
 
-            yield return new[]
-                         {
-                             "FriendshipPunter",
-                             "BargeHauler3",
-                             "BargeHauler4",
-                             "MineConnecterPunter",
-                             "MineConnecterFullPunter",
-                             "BargeHauler5",
-                             "BargeHauler6",
-                             "BargeHauler7",
-                         };
+            for (var i = 0; i < 10; i++)
+                yield return GetRandomBattle(allPunters, 10).ToArray();
+        }
 
-            yield return new[]
-                         {
-                             "FriendshipPunter",
-                             "BargeHauler3",
-                             "BargeHauler4",
-                             "MineConnecterPunter",
-                             "MineConnecterFullPunter",
-                             "BargeHauler5",
-                             "BargeHauler6",
-                             "BargeHauler7",
-                             "FriendshipPunter",
-                             "BargeHauler3",
-                             "BargeHauler4",
-                             "MineConnecterPunter",
-                             "MineConnecterFullPunter",
-                             "BargeHauler5",
-                             "BargeHauler6",
-                             "BargeHauler7",
-                         };*/
-
-            foreach (var x in allPunters)
-            foreach (var y in allPunters.Except(new[] { x }))
-            foreach (var z in allPunters.Except(new[] { x, y }))
-            foreach (var k in allPunters.Except(new[] { x, y, z }))
-                yield return new[] { x, y, z, k };
+        private static IEnumerable<string> GetRandomBattle(string[] allPunters, int count)
+        {
+            for (var i = 0; i < count; i++)
+                yield return allPunters[random.Next(0, allPunters.Length - 1)];
         }
 
         private static string[] GetAllPunters()
@@ -170,13 +137,11 @@ namespace Distributor
             return new[]
                    {
                        typeof(FriendshipPunter),
+                       typeof(MaxFriendshipPunter),
                        typeof(BargeHauler3),
                        typeof(BargeHauler4),
-                       typeof(MineConnecterPunter),
-                       typeof(MineConnecterFullPunter),
+                       typeof(GreedyEdgeChooserPunterWithStupidZergRush),
                        typeof(BargeHauler5),
-                       typeof(BargeHauler6),
-                       typeof(BargeHauler7)
                    }
                 .Select(x => x.Name)
                 .ToArray();
